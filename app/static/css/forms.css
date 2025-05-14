@@ -1,0 +1,78 @@
+.form-page-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  padding: 10px;
+  flex-grow: 1;
+  justify-content: center;
+}
+
+.form-box {
+  background-color: var(--beige);
+  padding: 25px 30px;
+  border-radius: 8px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.15);
+  width: 100%;
+  max-width: 380px;
+}
+
+.form-box h2 {
+  text-align: center;
+  margin-top: 0;
+  margin-bottom: 25px;
+  color: var(--quantum);
+  font-size: 1.8em;
+}
+
+.form-box .form-group {
+  margin-bottom: 18px;
+}
+
+.form-box input[type="text"],
+.form-box input[type="email"],
+.form-box input[type="password"] {
+  width: 100%;
+  padding: 12px 15px;
+  border: 1px solid var(--matte-gray);
+  border-radius: 5px;
+  font-size: 1em;
+  background-color: var(--white);
+  color: var(--quantum);
+}
+
+.form-box input[type="text"]:focus,
+.form-box input[type="email"]:focus,
+.form-box input[type="password"]:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(218, 106, 5, 0.2);
+}
+
+.form-box button[type="submit"] {
+  width: 100%;
+  padding: 12px;
+  background-color: var(--primary-color);
+  color: var(--beige);
+  border: none;
+  border-radius: 5px;
+  font-size: 1.1em;
+  font-weight: bold;
+  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+}
+
+.form-box button[type="submit"]:hover {
+  background-color: var(--secondary-color);
+  color: var(--quantum);
+}
+
+.form-box .form-link-container {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 0.95em;
+}
+
+.form-box .form-link-container a {
+  color: var(--primary-color);
+  font-weight: bold;
+}

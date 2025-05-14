@@ -1,0 +1,218 @@
+{% extends "base.html" %} {% block title %}Feed - Corsona{% endblock %} {% block
+head_css %}
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/feed_styles.css') }}"
+/>
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/profile_modal_styles.css') }}"
+/>
+<link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+  integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
+  crossorigin="anonymous"
+  referrerpolicy="no-referrer"
+/>
+{% endblock %} {% block content %}
+<div class="container">
+  <aside class="sidebar">
+    <div class="profile-header">
+      <div class="profile-avatar">
+        <div
+          class="profile-img"
+          id="sidebarProfileAvatar"
+          style="background-image: url('{{ url_for('static', filename='images/logos/avatar-default.svg') }}');"
+        ></div>
+      </div>
+      <div class="profile-info">
+        <h2 class="profile-name" id="userName">Carregando...</h2>
+        <p class="profile-username" id="userUsername">@carregando</p>
+        <button id="editProfileButton" class="profile-edit-button">
+          Editar Perfil
+        </button>
+      </div>
+    </div>
+
+    <div class="profile-stats">
+      <div class="stat">
+        <span class="stat-count" id="userPostCount">0</span
+        ><span class="stat-label">Publicações</span>
+      </div>
+      <div class="stat">
+        <span class="stat-count">0</span
+        ><span class="stat-label">Seguidores</span>
+      </div>
+      <div class="stat">
+        <span class="stat-count">0</span
+        ><span class="stat-label">Seguindo</span>
+      </div>
+    </div>
+    <div class="profile-bio">
+      <p id="bioDisplay" class="bio-text">Sua bio aparecerá aqui.</p>
+    </div>
+    <div class="profile-highlights">
+      <h3>Destaques</h3>
+      <div class="highlights-container">
+        <div class="highlight">
+          <div class="highlight-img"><i class="fas fa-music"></i></div>
+          <span>Músicas</span>
+        </div>
+        <div class="highlight">
+          <div class="highlight-img"><i class="fas fa-microphone"></i></div>
+          <span>Shows</span>
+        </div>
+        <div class="highlight">
+          <div class="highlight-img"><i class="fas fa-camera"></i></div>
+          <span>Fotos</span>
+        </div>
+      </div>
+    </div>
+    <button id="logoutButton" class="logout-button">Sair</button>
+  </aside>
+
+  <main class="main-content">
+    <div class="create-post-section">
+      <h3>Criar Nova Publicação</h3>
+      <form id="createPostForm">
+        <div class="form-group">
+          <textarea
+            id="postContent"
+            name="content"
+            placeholder="No que você está pensando, {{ session.user_name or 'Artista' }}?"
+            required
+          ></textarea>
+        </div>
+        <div class="form-group file-input-group">
+          <label for="postImage" class="file-label"
+            ><i class="fas fa-image"></i> Adicionar Imagem</label
+          >
+          <input
+            type="file"
+            id="postImage"
+            name="image"
+            accept="image/png, image/jpeg, image/gif"
+          />
+          <span id="postImageName" class="file-name-display"></span>
+        </div>
+        <button type="submit" class="submit-post-button">Publicar</button>
+      </form>
+    </div>
+
+    <h1 class="feed-title">Publicações Recentes</h1>
+    <div id="postsContainer">
+      <div class="post-placeholder" id="postPlaceholder">
+        <p>Nenhuma publicação para exibir no momento.</p>
+        <p><i class="fas fa-stream fa-2x"></i></p>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div id="editProfileModal" class="modal" style="display: none">
+  <div class="modal-dialog">
+    <div class="modal-header">
+      <h2>Editar Perfil</h2>
+      <button class="close-modal-button" aria-label="Fechar modal">×</button>
+    </div>
+    <div class="modal-body">
+      <form id="profileUpdateForm">
+        <div class="form-group">
+          <label for="avatarInput">Avatar</label>
+          <div class="avatar-edit">
+            <div
+              id="avatarPreviewContainer"
+              class="avatar-preview"
+              style="background-image: url('{{ url_for('static', filename='images/logos/avatar-default.svg') }}');"
+            ></div>
+            <input
+              type="file"
+              id="avatarInput"
+              name="avatar"
+              accept="image/png, image/jpeg, image/gif"
+              style="display: none"
+            />
+            <button type="button" id="chooseAvatarButton" class="modal-button">
+              Escolher imagem
+            </button>
+          </div>
+          <div class="avatar-controls">
+            <p>Arraste para ajustar a posição.</p>
+            <p>Use a roda do mouse para zoom.</p>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="nameInput">Nome</label>
+          <input type="text" id="nameInput" name="name" required />
+        </div>
+        <div class="form-group">
+          <label for="usernameInput">Nome de Usuário</label>
+          <input type="text" id="usernameInput" name="username" required />
+        </div>
+        <div class="form-group">
+          <label for="bioInput">Descrição (Bio)</label>
+          <textarea
+            id="bioInput"
+            name="bio"
+            maxlength="150"
+            placeholder="Escreva algo sobre você..."
+          ></textarea>
+          <div class="char-counter"><span id="bioCharCount">0</span>/150</div>
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <p id="emailDisplay" class="info-display">seuemail@example.com</p>
+        </div>
+      </form>
+      <hr class="divider" />
+      <div class="password-section">
+        <h3>Alterar Senha</h3>
+        <form id="passwordChangeForm">
+          <div class="form-group">
+            <label for="currentPassword">Senha atual</label>
+            <input
+              type="password"
+              id="currentPassword"
+              name="currentPassword"
+              autocomplete="current-password"
+            />
+          </div>
+          <div class="form-group">
+            <label for="newPassword">Nova senha</label>
+            <input
+              type="password"
+              id="newPassword"
+              name="newPassword"
+              autocomplete="new-password"
+            />
+          </div>
+          <div class="form-group">
+            <label for="confirmPassword">Confirme a nova senha</label>
+            <input
+              type="password"
+              id="confirmPassword"
+              name="confirmPassword"
+              autocomplete="new-password"
+            />
+          </div>
+          <button type="button" id="changePasswordButton" class="modal-button">
+            Atualizar Senha
+          </button>
+        </form>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" id="cancelProfileButton" class="modal-button">
+        Cancelar
+      </button>
+      <button type="button" id="saveProfileButton" class="modal-button primary">
+        Salvar Alterações
+      </button>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block scripts %}
+<script src="{{ url_for('static', filename='js/feed.js') }}"></script>
+<script src="{{ url_for('static', filename='js/profileModal.js') }}"></script>
+{% endblock %}

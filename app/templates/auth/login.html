@@ -1,0 +1,44 @@
+{% extends "base.html" %} {% block title %}Login - Corsona{% endblock %} {%
+block head_css %}
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/forms.css') }}"
+/>
+{% endblock %} {% block content %}
+<div class="form-page-container">
+  <div class="form-box">
+    <h2>Login</h2>
+    <form id="loginForm">
+      <div class="form-group">
+        <input
+          type="text"
+          id="loginIdentifier"
+          name="identifier"
+          placeholder="E-mail ou nome de usuário"
+          required
+          autocomplete="username"
+        />
+      </div>
+      <div class="form-group">
+        <input
+          type="password"
+          id="loginPassword"
+          name="password"
+          placeholder="Senha"
+          required
+          autocomplete="current-password"
+        />
+      </div>
+      <button type="submit">Entrar</button>
+    </form>
+    <div class="form-link-container">
+      <p>
+        Não tem uma conta?
+        <a href="{{ url_for('auth.register') }}">Cadastre-se aqui</a>
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block scripts %}
+<script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+{% endblock %}

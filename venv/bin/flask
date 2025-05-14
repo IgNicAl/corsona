@@ -1,4 +1,4 @@
-#!/home/ignical/Documentos/corsona/venv/bin/python3
+#!/home/ignical/Documentos/testArea/corsona/venv/bin/python3
 # -*- coding: utf-8 -*-
 import re
 import sys
