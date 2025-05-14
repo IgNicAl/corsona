@@ -53,3 +53,5 @@ htmlcov/
 .cache
 coverage.xml
 *.cover 
+
+/uploads/*
