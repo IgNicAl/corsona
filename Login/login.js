@@ -1,40 +1,40 @@
 document.addEventListener('DOMContentLoaded', () => {
     console.log('DOM carregado, inicializando script de login (login.js).');
-    
-    const loginForm = document.getElementById('loginForm') || document.querySelector('.login-container form'); 
-    
+
+    const loginForm = document.getElementById('loginForm') || document.querySelector('.login-container form');
+
     if (!loginForm) {
         console.error('Login form not found!');
         return;
     }
-    
+
     console.log('Formulário encontrado:', loginForm);
-    
-    loginForm.addEventListener('submit', async function(e) {
+
+    loginForm.addEventListener('submit', async function (e) {
         e.preventDefault();
         console.log('Formulário submetido, iniciando processo de login.');
-        
+
         const identifierInput = document.getElementById('loginIdentifier');
         const passwordInput = document.getElementById('loginPassword');
-        
+
         if (!identifierInput || !passwordInput) {
             alert('Erro interno: Campos de identificação ou senha não encontrados.');
             return;
         }
-        
+
         const identifier = identifierInput.value;
         const password = passwordInput.value;
-        
-        console.log('Valores capturados - Identificador:', identifier ? identifier : 'vazio', 
-                    'Senha:', password ? 'preenchida' : 'vazia');
-        
+
+        console.log('Valores capturados - Identificador:', identifier ? identifier : 'vazio',
+            'Senha:', password ? 'preenchida' : 'vazia');
+
         if (!identifier || !password) {
             alert('Por favor, preencha o e-mail ou nome de usuário e a senha.');
             return;
         }
-        
+
         console.log('Enviando credenciais para o backend...');
-        
+
         try {
             const response = await fetch('/api/login', {
                 method: 'POST',

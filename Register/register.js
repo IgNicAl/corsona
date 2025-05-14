@@ -7,6 +7,24 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
     const password = document.getElementById('password').value;
     const confirmPassword = document.getElementById('confirmPassword').value;
 
+    const nameRegex = /^[A-Za-zÀ-ú\s]+$/;
+    if (!nameRegex.test(name)) {
+        alert('O nome deve conter apenas letras.');
+        return;
+    }
+
+    const usernameRegex = /^\S+$/;
+    if (!usernameRegex.test(username)) {
+        alert('O nome de usuário não pode conter espaços.');
+        return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        alert('Por favor, insira um endereço de e-mail válido.');
+        return;
+    }
+
     if (password !== confirmPassword) {
         alert('As senhas não coincidem!');
         return;
@@ -30,7 +48,7 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
 
         if (response.ok) {
             alert(data.message || 'Cadastro realizado com sucesso!');
-            window.location.href = '/Login'; 
+            window.location.href = '/Login';
         } else {
             alert(data.message || 'Erro ao realizar cadastro');
         }

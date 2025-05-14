@@ -4,38 +4,41 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-DB_HOST = os.environ.get('DB_HOST', 'localhost')
-DB_USER = os.environ.get('DB_USER')
-DB_PASSWORD = os.environ.get('DB_PASSWORD')
-DB_NAME = os.environ.get('DB_NAME', 'corsona')
+DB_HOST = os.environ.get("DB_HOST", "localhost")
+DB_USER = os.environ.get("DB_USER")
+DB_PASSWORD = os.environ.get("DB_PASSWORD")
+DB_NAME = os.environ.get("DB_NAME", "corsona")
 
 if DB_USER is None:
     raise ValueError("A variável de ambiente DB_USER não está configurada.")
 if DB_PASSWORD is None:
     raise ValueError("A variável de ambiente DB_PASSWORD não está configurada.")
 
+
 def get_db_connection(database_name=DB_NAME):
     try:
         conn = mysql.connector.connect(
-            host=DB_HOST,
-            user=DB_USER,
-            password=DB_PASSWORD,
-            database=database_name
+            host=DB_HOST, user=DB_USER, password=DB_PASSWORD, database=database_name
         )
         return conn
     except mysql.connector.Error as err:
-        print(f"Error connecting to MySQL (Host: {DB_HOST}, User: {DB_USER}, DB: {database_name}): {err}")
+        print(
+            f"Error connecting to MySQL (Host: {DB_HOST}, User: {DB_USER}, DB: {database_name}): {err}"
+        )
         return None
     except ValueError as ve:
         print(f"Configuration error: {ve}")
         return None
+
 
 def init_db():
     try:
         conn_server = get_db_connection(database_name=None)
 
         if not conn_server:
-            print(f"Could not connect to MySQL server (Host: {DB_HOST}, User: {DB_USER}). Please check your .env file.")
+            print(
+                f"Could not connect to MySQL server (Host: {DB_HOST}, User: {DB_USER}). Please check your .env file."
+            )
             return
 
         cursor_server = conn_server.cursor()
@@ -57,7 +60,9 @@ def init_db():
                 name VARCHAR(255) NOT NULL,
                 username VARCHAR(255) UNIQUE NOT NULL,
                 email VARCHAR(255) UNIQUE NOT NULL,
-                password VARCHAR(255) NOT NULL
+                password VARCHAR(255) NOT NULL,
+                bio VARCHAR(150) DEFAULT NULL,
+                avatar_path VARCHAR(255) DEFAULT NULL
             )
         """)
         print("Table 'users' checked/created.")
