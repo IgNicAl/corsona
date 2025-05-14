@@ -1,51 +1,66 @@
 document.addEventListener('DOMContentLoaded', async () => {
+    const sidebarProfileAvatar = document.getElementById('sidebarProfileAvatar');
     const bioDisplay = document.getElementById('bioDisplay');
-    const profileAvatar = document.querySelector('.profile-img');
     const profileName = document.getElementById('userName');
     const profileUsername = document.getElementById('userUsername');
+    const stats = document.querySelectorAll('.profile-stats .stat-count');
 
-    let userData = null;
+    const defaultAvatar = '/Logos/avatar-default.svg';
+
+    const updateProfileUI = (user) => {
+        if (user) {
+            profileName.textContent = user.name || 'Nome Completo';
+            profileUsername.textContent = '@' + (user.username || 'username');
+            bioDisplay.textContent = user.bio || 'Aqui vai uma breve descrição do usuário.';
+
+            if (user.avatar_path) {
+                sidebarProfileAvatar.style.backgroundImage = `url('${user.avatar_path}')`;
+                sidebarProfileAvatar.style.backgroundPosition = user.avatar_position || 'center';
+                sidebarProfileAvatar.style.backgroundSize = user.avatar_size || 'cover';
+            } else {
+                sidebarProfileAvatar.style.backgroundImage = `url('${defaultAvatar}')`;
+                sidebarProfileAvatar.style.backgroundPosition = 'center';
+                sidebarProfileAvatar.style.backgroundSize = 'cover';
+            }
+        } else {
+            profileName.textContent = 'Carregando...';
+            profileUsername.textContent = '@carregando';
+            bioDisplay.textContent = 'Aqui vai uma breve descrição do usuário.';
+            sidebarProfileAvatar.style.backgroundImage = `url('${defaultAvatar}')`;
+            sidebarProfileAvatar.style.backgroundPosition = 'center';
+            sidebarProfileAvatar.style.backgroundSize = 'cover';
+            stats.forEach(stat => stat.textContent = '0');
+        }
+    };
 
     try {
-        console.log("Tentando carregar dados do usuário...");
         const response = await fetch('/api/user');
-        console.log("Resposta da API:", response.status, response.statusText);
 
         if (response.status === 401) {
-            console.error("Não autenticado (401), redirecionando para login");
             alert("Sua sessão expirou ou você não está autenticado. Redirecionando para o login.");
             window.location.href = '/Login';
             return;
         }
 
         if (!response.ok) {
-            console.error("Resposta não ok:", response.status);
             const errorText = await response.text();
-            console.error("Detalhes do erro:", errorText);
             alert(`Erro ao carregar dados do usuário: ${response.status} ${response.statusText}`);
+            updateProfileUI(null);
             return;
         }
 
         const data = await response.json();
-        console.log("Dados recebidos:", data);
 
         if (data.user) {
-            userData = data.user;
-
-            profileName.textContent = userData.name;
-            profileUsername.textContent = '@' + userData.username;
-
-            if (userData.bio) {
-                bioDisplay.textContent = userData.bio;
-            }
-
+            updateProfileUI(data.user);
+            window.currentUserData = data.user;
         } else {
-            console.error("Dados do usuário ausentes na resposta");
             alert("Erro ao obter dados do usuário: dados ausentes na resposta");
+            updateProfileUI(null);
         }
     } catch (error) {
-        console.error('Erro ao carregar dados do usuário:', error);
         alert(`Erro ao carregar dados do usuário: ${error.message}`);
+        updateProfileUI(null);
     }
 
     const logoutButton = document.getElementById('logoutButton');
@@ -62,11 +77,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (response.ok) {
                     window.location.href = '/Login';
                 } else {
-                    console.error('Erro ao fazer logout');
+                    alert('Falha ao fazer logout.');
                 }
             } catch (error) {
-                console.error('Erro na comunicação com o servidor:', error);
+                alert('Erro de comunicação com o servidor ao fazer logout.');
             }
         });
     }
-}); 
+
+    document.addEventListener('profileUpdated', (event) => {
+        updateProfileUI(event.detail.user);
+        window.currentUserData = event.detail.user;
+    });
+});

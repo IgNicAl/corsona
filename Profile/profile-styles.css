@@ -87,14 +87,27 @@
   display: flex;
   align-items: center;
   gap: 20px;
+  flex-wrap: wrap; /* Permite quebra de linha em telas menores */
 }
 
+/* Estilo para o contêiner do avatar no modal que usará background-image */
 .avatar-preview {
   width: 80px;
   height: 80px;
   border-radius: 50%;
-  object-fit: cover;
   border: 1px solid #dbdbdb;
+  background-color: #ddd; /* Fundo padrão */
+  background-size: cover; /* Garante que a imagem cubra o contêiner */
+  background-position: center; /* Centraliza a imagem inicialmente */
+  background-repeat: no-repeat; /* Evita repetição da imagem */
+  overflow: hidden; /* Essencial para a máscara circular */
+  position: relative; /* Necessário para o arraste */
+  cursor: grab; /* Indica que a imagem pode ser arrastada */
+  flex-shrink: 0; /* Impede que o contêiner do avatar encolha */
+}
+
+.avatar-preview:active {
+  cursor: grabbing; /* Altera o cursor durante o arraste */
 }
 
 input[type="file"] {
@@ -110,6 +123,9 @@ input[type="file"] {
   font-weight: 600;
   font-size: 0.9em;
   cursor: pointer;
+  flex-grow: 1; /* Permite que o botão cresça em layout flex */
+  max-width: 150px; /* Limita o tamanho máximo do botão */
+  text-align: center;
 }
 
 .secondary-button:hover {
@@ -142,6 +158,7 @@ input[type="file"] {
 .button-group {
   display: flex;
   gap: 15px;
+  justify-content: flex-end; /* Alinha botões à direita */
 }
 
 .save-button {
@@ -151,7 +168,8 @@ input[type="file"] {
   border-radius: 4px;
   padding: 8px 16px;
   font-weight: 600;
-  flex-grow: 1;
+  flex-grow: 1; /* Permite que o botão cresça em layout flex */
+  max-width: 150px; /* Limita o tamanho máximo do botão */
   cursor: pointer;
 }
 
@@ -167,6 +185,9 @@ input[type="file"] {
   padding: 8px 16px;
   font-weight: 600;
   cursor: pointer;
+  flex-grow: 1; /* Permite que o botão cresça em layout flex */
+  max-width: 150px; /* Limita o tamanho máximo do botão */
+  text-align: center;
 }
 
 .cancel-button:hover {
@@ -178,6 +199,27 @@ input[type="file"] {
   font-size: 0.8em;
   color: #8e8e8e;
   margin-top: 5px;
+}
+
+.avatar-controls {
+  margin-top: 10px;
+  font-size: 0.8em;
+  color: #8e8e8e;
+  text-align: center;
+  width: 100%; /* Ocupa a largura total abaixo da área de edição */
+}
+
+/* Estilos para o contêiner do avatar na barra lateral */
+.sidebar .profile-avatar .profile-img {
+  width: 100px; /* Tamanho para a barra lateral */
+  height: 100px; /* Tamanho para a barra lateral */
+  border-radius: 50%;
+  border: 1px solid #dbdbdb; /* Mesma borda do modal para consistência */
+  background-color: #ddd; /* Fundo padrão */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  overflow: hidden;
 }
 
 @media (max-width: 480px) {
@@ -193,5 +235,11 @@ input[type="file"] {
 
   .button-group {
     flex-direction: column;
+  }
+
+  .secondary-button,
+  .save-button,
+  .cancel-button {
+    max-width: 100%; /* Permite que os botões ocupem toda a largura em telas pequenas */
   }
 }

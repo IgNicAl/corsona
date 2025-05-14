@@ -10,6 +10,8 @@
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
     />
   </head>
   <body>
@@ -17,11 +19,7 @@
       <aside class="sidebar">
         <div class="profile-header">
           <div class="profile-avatar">
-            <img
-              src="https://via.placeholder.com/150"
-              alt="Avatar"
-              class="profile-img"
-            />
+            <div class="profile-img" id="sidebarProfileAvatar"></div>
           </div>
           <div class="profile-info">
             <h2 class="profile-name" id="userName">Carregando...</h2>
@@ -86,7 +84,11 @@
         <div class="post">
           <div class="post-header">
             <div class="avatar">
-              <img src="https://via.placeholder.com/40" alt="Avatar" />
+              <img
+                src="/Logos/avatar-default.svg"
+                alt="Avatar"
+                onerror="this.src='/Logos/logo3.svg';"
+              />
             </div>
             <h3 class="artist-name">Nome do Artista</h3>
             <p class="time-ago">2 horas atrás</p>
@@ -96,7 +98,11 @@
               Texto da publicação. Aqui vai o conteúdo da postagem do artista.
             </p>
             <div class="publication-image">
-              <img src="https://via.placeholder.com/600x400" alt="Publicação" />
+              <img
+                src=""
+                alt="Publicação"
+                onerror="this.src='/Logos/logo3.svg';"
+              />
             </div>
           </div>
           <div class="post-actions">
@@ -115,7 +121,11 @@
         <div class="post">
           <div class="post-header">
             <div class="avatar">
-              <img src="https://via.placeholder.com/40" alt="Avatar" />
+              <img
+                src="/Logos/avatar-default.svg"
+                alt="Avatar"
+                onerror="this.src='/Logos/logo3.svg';"
+              />
             </div>
             <h3 class="artist-name">Nome do Artista</h3>
             <p class="time-ago">5 horas atrás</p>
@@ -125,7 +135,11 @@
               Texto da publicação 2. Aqui vai o conteúdo da postagem do artista.
             </p>
             <div class="publication-image">
-              <img src="https://via.placeholder.com/600x400" alt="Publicação" />
+              <img
+                src=""
+                alt="Publicação"
+                onerror="this.src='/Logos/logo3.svg';"
+              />
             </div>
           </div>
           <div class="post-actions">
@@ -143,27 +157,25 @@
       </main>
     </div>
 
-    <!-- Modal de Edição de Perfil -->
     <div id="editProfileModal" class="modal">
       <div class="modal-content">
         <div class="modal-header">
           <h2>Editar Perfil</h2>
-          <span class="close">&times;</span>
+          <span class="close">×</span>
         </div>
         <div class="modal-body">
           <div class="form-group">
             <label for="avatarInput">Avatar</label>
             <div class="avatar-edit">
-              <img
-                id="avatarPreview"
-                src="https://via.placeholder.com/150"
-                alt="Avatar"
-                class="avatar-preview"
-              />
+              <div id="avatarPreviewContainer" class="avatar-preview"></div>
               <input type="file" id="avatarInput" accept="image/*" />
               <button id="chooseAvatarButton" class="secondary-button">
                 Escolher imagem
               </button>
+            </div>
+            <div class="avatar-controls">
+              <p>Arraste a imagem no círculo para ajustar a posição.</p>
+              <p>Use a roda do mouse sobre o círculo para zoom.</p>
             </div>
           </div>
 
@@ -173,16 +185,16 @@
           </div>
 
           <div class="form-group">
-            <label for="usernameInput">Nome de usuário</label>
+            <label for="usernameInput">Usuário</label>
             <input type="text" id="usernameInput" placeholder="@seu_username" />
           </div>
 
           <div class="form-group">
-            <label for="bioInput">Bio (máximo 150 caracteres)</label>
+            <label for="bioInput">Descrição</label>
             <textarea
               id="bioInput"
               maxlength="150"
-              placeholder="Escreva sua bio aqui..."
+              placeholder="Escreva sua descrição aqui..."
             ></textarea>
             <div class="char-counter"><span id="bioCharCount">0</span>/150</div>
           </div>

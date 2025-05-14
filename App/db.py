@@ -14,7 +14,6 @@ if DB_USER is None:
 if DB_PASSWORD is None:
     raise ValueError("A variável de ambiente DB_PASSWORD não está configurada.")
 
-
 def get_db_connection(database_name=DB_NAME):
     try:
         conn = mysql.connector.connect(
@@ -30,6 +29,16 @@ def get_db_connection(database_name=DB_NAME):
         print(f"Configuration error: {ve}")
         return None
 
+def check_column_exists(cursor, table_name, column_name):
+    """Verifica se uma coluna existe na tabela"""
+    cursor.execute(f"""
+        SELECT COUNT(*) 
+        FROM information_schema.COLUMNS 
+        WHERE TABLE_SCHEMA = '{DB_NAME}' 
+        AND TABLE_NAME = '{table_name}' 
+        AND COLUMN_NAME = '{column_name}'
+    """)
+    return cursor.fetchone()[0] > 0
 
 def init_db():
     try:
@@ -37,7 +46,7 @@ def init_db():
 
         if not conn_server:
             print(
-                f"Could not connect to MySQL server (Host: {DB_HOST}, User: {DB_USER}). Please check your .env file."
+                f"Could not connect to MySQL server (Host: {DB_HOST}, User: {DB_USER}). Please check your .env file and MySQL server status."
             )
             return
 
@@ -65,6 +74,23 @@ def init_db():
                 avatar_path VARCHAR(255) DEFAULT NULL
             )
         """)
+
+        # Verificando e adicionando a coluna avatar_position, se não existir
+        if not check_column_exists(cursor_db, 'users', 'avatar_position'):
+            cursor_db.execute("""
+                ALTER TABLE users 
+                ADD COLUMN avatar_position VARCHAR(50) DEFAULT '50% 50%'
+            """)
+            print("Column 'avatar_position' added to 'users' table.")
+
+        # Verificando e adicionando a coluna avatar_size, se não existir
+        if not check_column_exists(cursor_db, 'users', 'avatar_size'):
+            cursor_db.execute("""
+                ALTER TABLE users 
+                ADD COLUMN avatar_size VARCHAR(20) DEFAULT 'cover'
+            """)
+            print("Column 'avatar_size' added to 'users' table.")
+
         print("Table 'users' checked/created.")
         cursor_db.close()
         conn_db.close()
