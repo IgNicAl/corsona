@@ -1,0 +1,57 @@
+# Arquivos de bytecode Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribuição / empacotamento
+dist/
+build/
+*.egg-info/
+
+# Ambiente virtual
+venv/
+env/
+ENV/
+
+# Arquivos de ambiente
+.env
+.flaskenv
+
+# Flask
+flask_session/
+instance/
+
+# Logs
+*.log
+
+# Arquivos de banco de dados
+*.db
+*.sqlite
+*.sqlite3
+
+# Arquivos temporários
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*~
+
+# Arquivos de configuração local
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Dependências
+node_modules/
+
+# Relatórios de cobertura de testes
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+coverage.xml
+*.cover 
+
+/uploads/*
