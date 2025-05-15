@@ -65,11 +65,22 @@ def _init_db_tables():
             id INT AUTO_INCREMENT PRIMARY KEY,
             user_id INT NOT NULL,
             content TEXT NOT NULL,
-            image_path VARCHAR(255) DEFAULT NULL,
+            media_path VARCHAR(255) DEFAULT NULL,
+            media_type VARCHAR(10) DEFAULT NULL, 
+            post_type VARCHAR(20) DEFAULT 'publication', 
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
         )
     """)
+    if not _check_column_exists(cursor, db_name, 'posts', 'media_path'):
+        cursor.execute("ALTER TABLE posts ADD COLUMN media_path VARCHAR(255) DEFAULT NULL")
+    if not _check_column_exists(cursor, db_name, 'posts', 'media_type'):
+        cursor.execute("ALTER TABLE posts ADD COLUMN media_type VARCHAR(10) DEFAULT NULL")
+    if not _check_column_exists(cursor, db_name, 'posts', 'post_type'):
+        cursor.execute("ALTER TABLE posts ADD COLUMN post_type VARCHAR(20) DEFAULT 'publication'")
+    if _check_column_exists(cursor, db_name, 'posts', 'image_path'):
+        cursor.execute("ALTER TABLE posts CHANGE COLUMN image_path media_path VARCHAR(255) DEFAULT NULL")
+
 
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS likes (

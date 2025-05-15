@@ -7,14 +7,18 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const createPostForm = document.getElementById('createPostForm');
     const postContentInput = document.getElementById('postContent');
-    const postImageInput = document.getElementById('postImage');
-    const postImageNameDisplay = document.getElementById('postImageName');
+    const postMediaInput = document.getElementById('postMedia');
+    const postMediaNameDisplay = document.getElementById('postMediaName');
+    const postTypeInput = document.getElementById('postType');
     const postsContainer = document.getElementById('postsContainer');
     const postPlaceholder = document.getElementById('postPlaceholder');
+    const highlightsContainer = document.querySelector('.highlights-container');
 
     const defaultAvatarUrl = sidebarProfileAvatar ?
         (sidebarProfileAvatar.style.backgroundImage.slice(5, -2) || '/static/images/logos/avatar-default.svg')
         : '/static/images/logos/avatar-default.svg';
+
+    let currentFilter = 'all';
 
     const updateProfileUI = (user) => {
         if (!profileName || !profileUsername || !bioDisplay || !sidebarProfileAvatar) {
@@ -74,15 +78,37 @@ document.addEventListener('DOMContentLoaded', async () => {
         return `${years}a atrás`;
     };
 
+    const renderMediaElement = (mediaPath, mediaType) => {
+        if (!mediaPath) return '';
+        if (mediaType === 'image') {
+            return `<div class="publication-media image"><img src="${mediaPath}" alt="Imagem da Publicação" loading="lazy"></div>`;
+        } else if (mediaType === 'video') {
+            return `<div class="publication-media video"><video controls src="${mediaPath}" loading="lazy"></video></div>`;
+        } else if (mediaType === 'audio') {
+            return `<div class="publication-media audio"><audio controls src="${mediaPath}" loading="lazy"></audio></div>`;
+        }
+        return '';
+    };
+
+    const renderPostTypeIcon = (postType) => {
+        if (postType === 'event') {
+            return '<i class="fas fa-calendar-alt post-type-icon" title="Evento"></i>';
+        }
+        return '';
+    };
+
     const renderPost = (post, currentUser) => {
         const postDiv = document.createElement('div');
         postDiv.classList.add('post');
         postDiv.dataset.postId = post.id;
+        postDiv.dataset.postType = post.post_type;
+        postDiv.dataset.mediaType = post.media_type || 'none';
+
 
         const defaultUserAvatar = '/static/images/logos/avatar-default.svg';
         const userAvatar = post.user_avatar_path || defaultUserAvatar;
-        const postImageHTML = post.image_path ?
-            `<div class="publication-image"><img src="${post.image_path}" alt="Imagem da Publicação" loading="lazy"></div>` : '';
+        const mediaHTML = renderMediaElement(post.media_path, post.media_type);
+        const postTypeIconHTML = renderPostTypeIcon(post.post_type);
 
         const likedClass = post.liked_by_current_user ? 'liked' : '';
         const likeIconClass = post.liked_by_current_user ? 'fas' : 'far';
@@ -94,10 +120,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <h3 class="artist-name">${post.user_name || post.username}</h3>
                     <p class="time-ago" title="${new Date(post.created_at).toLocaleString()}">${formatTimeAgo(post.created_at)}</p>
                 </div>
+                <div class="post-type-indicator">${postTypeIconHTML}</div>
             </div>
             <div class="post-content">
-                <p class="publication-text">${post.content.replace(/\n/g, '<br>')}</p>
-                ${postImageHTML}
+                <p class="publication-text">${post.content ? post.content.replace(/\n/g, '<br>') : ''}</p>
+                ${mediaHTML}
             </div>
             <div class="post-stats">
                 <span class="like-count-display">${post.like_count || 0} curtida${post.like_count !== 1 ? 's' : ''}</span>
@@ -147,7 +174,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const loadAndDisplayComments = async (postId, commentsListDiv) => {
         try {
             const data = await apiRequest(`/feed/api/posts/${postId}/comments`, 'GET');
-            commentsListDiv.innerHTML = ''; // Limpa comentários antigos
+            commentsListDiv.innerHTML = '';
             if (data.comments && data.comments.length > 0) {
                 data.comments.forEach(comment => {
                     commentsListDiv.appendChild(renderComment(comment));
@@ -173,7 +200,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const response = await apiRequest(`/feed/api/posts/${postId}/like`, 'POST');
                 const likeButton = target;
                 const likeIcon = likeButton.querySelector('i');
-                const likeText = likeButton.querySelector('.like-text'); // Assumindo que o texto está em um span
+                const likeText = likeButton.querySelector('.like-text');
                 const postElement = document.querySelector(`.post[data-post-id="${postId}"]`);
                 const likeCountDisplay = postElement ? postElement.querySelector('.like-count-display') : null;
 
@@ -200,12 +227,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (commentsSection) {
                 const isVisible = commentsSection.style.display === 'block';
                 commentsSection.style.display = isVisible ? 'none' : 'block';
-                if (!isVisible && commentsListDiv && commentsListDiv.children.length === 0) { // Carrega apenas se não estiver visível e vazio
+                if (!isVisible && commentsListDiv && (commentsListDiv.children.length === 0 || commentsListDiv.querySelector('.no-comments'))) {
                     await loadAndDisplayComments(postId, commentsListDiv);
                 }
             }
         } else if (target.classList.contains('share-button')) {
-            const postUrl = `${window.location.origin}/feed#post-${postId}`; // Placeholder URL
+            const postUrl = `${window.location.origin}/feed#post-${postId}`;
             try {
                 await navigator.clipboard.writeText(`Confira este post: ${postUrl}`);
                 alert("Link do post copiado para a área de transferência!");
@@ -232,13 +259,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (response.comment) {
                 const commentsListDiv = document.getElementById(`comments-list-${postId}`);
                 if (commentsListDiv) {
-                    // Remove "Nenhum comentário ainda" se existir
                     const noCommentsP = commentsListDiv.querySelector('.no-comments');
                     if (noCommentsP) noCommentsP.remove();
 
                     commentsListDiv.appendChild(renderComment(response.comment));
                 }
-                commentInput.value = ''; // Limpa o input
+                commentInput.value = '';
 
                 const postElement = document.querySelector(`.post[data-post-id="${postId}"]`);
                 const commentCountDisplay = postElement ? postElement.querySelector('.comment-count-display') : null;
@@ -261,17 +287,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
 
-    const loadPosts = async () => {
+    const loadPosts = async (filter = 'all') => {
         if (!postsContainer || !postPlaceholder) return;
         try {
-            const data = await apiRequest('/feed/api/posts', 'GET');
+            const endpoint = filter === 'all' ? '/feed/api/posts' : `/feed/api/posts?filter=${filter}`;
+            const data = await apiRequest(endpoint, 'GET');
             postsContainer.innerHTML = '';
             if (data.posts && data.posts.length > 0) {
                 postPlaceholder.style.display = 'none';
                 data.posts.forEach(post => {
                     postsContainer.appendChild(renderPost(post, window.currentUserData));
                 });
-                if (window.currentUserData && userPostCountElement) {
+                if (window.currentUserData && userPostCountElement && filter === 'all') {
                     const userPosts = data.posts.filter(p => p.user_id === window.currentUserData.id);
                     userPostCountElement.textContent = userPosts.length;
                 }
@@ -279,7 +306,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             } else {
                 postsContainer.appendChild(postPlaceholder);
                 postPlaceholder.style.display = 'block';
-                if (userPostCountElement) userPostCountElement.textContent = '0';
+                postPlaceholder.innerHTML = '<p>Nenhuma publicação para exibir com este filtro.</p><p><i class="fas fa-stream fa-2x"></i></p>';
+                if (userPostCountElement && filter === 'all') userPostCountElement.textContent = '0';
             }
         } catch (error) {
             console.error("Erro ao carregar posts:", error);
@@ -294,53 +322,57 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (createPostForm) {
         createPostForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            if (!postContentInput) return;
+            if (!postContentInput || !postTypeInput) return;
 
             const content = postContentInput.value.trim();
-            const imageFile = postImageInput ? postImageInput.files[0] : null;
+            const mediaFile = postMediaInput ? postMediaInput.files[0] : null;
+            const postType = postTypeInput.value;
 
-            if (!content && !imageFile) {
-                alert("A publicação deve ter conteúdo ou uma imagem.");
+            if (!content && !mediaFile) {
+                alert("A publicação deve ter conteúdo ou uma mídia.");
                 return;
             }
-            if (content && content.length === 0 && !imageFile) { // Se só tiver imagem, content pode ser vazio
-                alert("O conteúdo da publicação não pode ser apenas espaços em branco se não houver imagem.");
-                return;
-            }
-
 
             const formData = new FormData();
             formData.append('content', content);
-            if (imageFile) {
-                formData.append('image', imageFile);
+            formData.append('post_type', postType);
+            if (mediaFile) {
+                formData.append('media', mediaFile);
             }
 
             try {
                 const result = await apiRequest('/feed/api/posts', 'POST', formData, true);
                 if (result.post) {
-                    const newPostElement = renderPost(result.post, window.currentUserData);
-                    if (postsContainer.firstChild && postsContainer.firstChild.id === 'postPlaceholder') {
-                        postsContainer.innerHTML = '';
-                    }
-                    postsContainer.insertBefore(newPostElement, postsContainer.firstChild);
+                    await loadPosts(currentFilter);
                     createPostForm.reset();
-                    if (postImageNameDisplay) postImageNameDisplay.textContent = '';
-                    if (userPostCountElement) {
+                    if (postMediaNameDisplay) postMediaNameDisplay.textContent = '';
+                    if (currentFilter === 'all' && userPostCountElement && window.currentUserData && result.post.user_id === window.currentUserData.id) {
                         userPostCountElement.textContent = parseInt(userPostCountElement.textContent || "0") + 1;
                     }
                 }
-                // Não mostrar alert de sucesso na criação, o post aparecendo já é o feedback.
             } catch (error) {
             }
         });
     }
 
-    if (postImageInput && postImageNameDisplay) {
-        postImageInput.addEventListener('change', () => {
-            if (postImageInput.files.length > 0) {
-                postImageNameDisplay.textContent = postImageInput.files[0].name;
+    if (postMediaInput && postMediaNameDisplay) {
+        postMediaInput.addEventListener('change', () => {
+            if (postMediaInput.files.length > 0) {
+                postMediaNameDisplay.textContent = postMediaInput.files[0].name;
             } else {
-                postImageNameDisplay.textContent = '';
+                postMediaNameDisplay.textContent = '';
+            }
+        });
+    }
+
+    if (highlightsContainer) {
+        highlightsContainer.addEventListener('click', (e) => {
+            const highlightItem = e.target.closest('.highlight');
+            if (highlightItem && highlightItem.dataset.filter) {
+                currentFilter = highlightItem.dataset.filter;
+                document.querySelectorAll('.highlight').forEach(item => item.classList.remove('active-filter'));
+                highlightItem.classList.add('active-filter');
+                loadPosts(currentFilter);
             }
         });
     }
@@ -349,16 +381,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         const userData = await apiRequest('/feed/api/user', 'GET');
         if (userData.user) {
             updateProfileUI(userData.user);
-            window.currentUserData = userData.user; // Garante que currentUserData está definido
-            await loadPosts();
+            window.currentUserData = userData.user;
+            await loadPosts(currentFilter);
         } else {
             updateProfileUI(null);
-            await loadPosts();
+            await loadPosts(currentFilter);
         }
     } catch (error) {
         updateProfileUI(null);
-        await loadPosts();
-        if (error.message.includes("Autenticação requerida") || (error.response && error.response.status === 401)) {
+        await loadPosts(currentFilter);
+        if (error.message && (error.message.includes("Autenticação requerida") || error.message.includes("Usuário não encontrado"))) {
             alert("Sua sessão expirou ou você não está autenticado. Redirecionando para o login.");
             window.location.href = '/auth/login';
         }
@@ -380,7 +412,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (event.detail && event.detail.user) {
             updateProfileUI(event.detail.user);
             window.currentUserData = event.detail.user;
-            await loadPosts();
+            await loadPosts(currentFilter);
         }
     });
 });
