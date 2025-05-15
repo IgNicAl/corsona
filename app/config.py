@@ -27,7 +27,7 @@ class Config:
 
     UPLOAD_FOLDER_NAME = 'uploads'
     UPLOAD_FOLDER = os.path.join(PROJECT_ROOT, UPLOAD_FOLDER_NAME)
-    ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+    ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'mp4', 'webm', 'ogg', 'mp3', 'wav'}
 
     SESSION_TYPE = "filesystem"
     SESSION_PERMANENT = True

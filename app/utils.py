@@ -74,21 +74,34 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in current_app.config['ALLOWED_EXTENSIONS']
 
-def save_avatar(avatar_file, old_avatar_path=None):
-    if avatar_file and allowed_file(avatar_file.filename):
-        filename = secure_filename(avatar_file.filename)
+def get_media_type(filename):
+    extension = filename.rsplit('.', 1)[1].lower()
+    if extension in ['png', 'jpg', 'jpeg', 'gif']:
+        return 'image'
+    elif extension in ['mp4', 'webm', 'ogg']:
+        return 'video'
+    elif extension in ['mp3', 'wav']:
+        return 'audio'
+    return None
+
+def save_media_file(media_file, old_media_path=None):
+    if media_file and allowed_file(media_file.filename):
+        filename = secure_filename(media_file.filename)
         unique_filename = f"{secrets.token_hex(8)}_{filename}"
         file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], unique_filename)
-        avatar_file.save(file_path)
-        new_avatar_path = f'/{current_app.config["UPLOAD_FOLDER_NAME"]}/{unique_filename}'
+        media_file.save(file_path)
+        new_media_path = f'/{current_app.config["UPLOAD_FOLDER_NAME"]}/{unique_filename}'
 
-        if old_avatar_path and old_avatar_path.startswith(f'/{current_app.config["UPLOAD_FOLDER_NAME"]}/'):
-            old_filename_in_uploads = old_avatar_path.split('/')[-1]
-            old_avatar_full_path = os.path.join(current_app.config['UPLOAD_FOLDER'], old_filename_in_uploads)
-            if os.path.exists(old_avatar_full_path):
+        if old_media_path and old_media_path.startswith(f'/{current_app.config["UPLOAD_FOLDER_NAME"]}/'):
+            old_filename_in_uploads = old_media_path.split('/')[-1]
+            old_media_full_path = os.path.join(current_app.config['UPLOAD_FOLDER'], old_filename_in_uploads)
+            if os.path.exists(old_media_full_path):
                 try:
-                    os.remove(old_avatar_full_path)
+                    os.remove(old_media_full_path)
                 except Exception as e:
-                    current_app.logger.error(f"Erro ao remover avatar antigo {old_avatar_full_path}: {e}")
-        return new_avatar_path
+                    current_app.logger.error(f"Erro ao remover mídia antiga {old_media_full_path}: {e}")
+        return new_media_path
     return None
+
+def save_avatar(avatar_file, old_avatar_path=None):
+    return save_media_file(avatar_file, old_avatar_path)

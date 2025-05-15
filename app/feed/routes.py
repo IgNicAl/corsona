@@ -1,6 +1,6 @@
 from flask import session, redirect, url_for, render_template, jsonify, request, current_app
 from . import feed_bp
-from ..utils import login_required, db_handler, serialize_user, save_avatar 
+from ..utils import login_required, db_handler, serialize_user, save_media_file, get_media_type
 import os
 
 @feed_bp.route("/")
@@ -30,29 +30,34 @@ def get_current_user_api(cursor):
 def create_post_api(cursor):
     user_id = session["user_id"]
     content = request.form.get("content")
-    image_file = request.files.get("image")
+    media_file = request.files.get("media")
+    post_type = request.form.get("post_type", "publication")
 
-    if not content and not image_file:
-        return jsonify({"message": "O post deve ter conteúdo ou uma imagem."}), 400
-    if content and len(content.strip()) == 0 and not image_file:
+    if not content and not media_file:
+        return jsonify({"message": "O post deve ter conteúdo ou uma mídia."}), 400
+    if content and len(content.strip()) == 0 and not media_file:
         return jsonify({"message": "O conteúdo do post não pode ser apenas espaços em branco."}), 400
+    
+    if post_type not in ["publication", "event"]:
+        return jsonify({"message": "Tipo de post inválido."}), 400
 
-
-    image_path = None
-    if image_file:
-        image_path = save_avatar(image_file) 
-        if not image_path:
-            return jsonify({"message": "Falha ao salvar a imagem ou tipo de arquivo inválido."}), 400
+    media_path = None
+    media_type_name = None
+    if media_file:
+        media_path = save_media_file(media_file) 
+        if not media_path:
+            return jsonify({"message": "Falha ao salvar a mídia ou tipo de arquivo inválido."}), 400
+        media_type_name = get_media_type(media_file.filename)
 
     try:
         cursor.execute(
-            "INSERT INTO posts (user_id, content, image_path) VALUES (%s, %s, %s)",
-            (user_id, content if content else '', image_path)
+            "INSERT INTO posts (user_id, content, media_path, media_type, post_type) VALUES (%s, %s, %s, %s, %s)",
+            (user_id, content if content else '', media_path, media_type_name, post_type)
         )
         new_post_id = cursor.lastrowid
         
         cursor.execute("""
-            SELECT p.id, p.user_id, p.content, p.image_path, p.created_at, 
+            SELECT p.id, p.user_id, p.content, p.media_path, p.media_type, p.post_type, p.created_at, 
                    u.username, u.name as user_name, u.avatar_path as user_avatar_path,
                    (SELECT COUNT(*) FROM likes WHERE post_id = p.id) as like_count,
                    EXISTS(SELECT 1 FROM likes WHERE post_id = p.id AND user_id = %s) as liked_by_current_user,
@@ -69,23 +74,41 @@ def create_post_api(cursor):
         return jsonify({"message": "Post criado com sucesso!", "post": new_post}), 201
     except Exception as e:
         current_app.logger.error(f"Erro ao criar post: {e}")
-        return jsonify({"message": "Erro interno ao criar o post."}), 500
+        return jsonify({"message": f"Erro interno ao criar o post: {str(e)}"}), 500
 
 @feed_bp.route("/api/posts", methods=["GET"])
 @login_required
 @db_handler
 def get_posts_api(cursor):
     current_user_id = session["user_id"]
-    cursor.execute("""
-        SELECT p.id, p.user_id, p.content, p.image_path, p.created_at, 
+    filter_type = request.args.get('filter')
+
+    base_query = """
+        SELECT p.id, p.user_id, p.content, p.media_path, p.media_type, p.post_type, p.created_at, 
                u.username, u.name as user_name, u.avatar_path as user_avatar_path,
                (SELECT COUNT(*) FROM likes WHERE post_id = p.id) as like_count,
                EXISTS(SELECT 1 FROM likes WHERE post_id = p.id AND user_id = %s) as liked_by_current_user,
                (SELECT COUNT(*) FROM comments WHERE post_id = p.id) as comment_count
         FROM posts p
         JOIN users u ON p.user_id = u.id
-        ORDER BY p.created_at DESC
-    """, (current_user_id,))
+    """
+    
+    params = [current_user_id]
+    where_clauses = []
+
+    if filter_type == 'audio':
+        where_clauses.append("p.media_type = 'audio'")
+    elif filter_type == 'event':
+        where_clauses.append("p.post_type = 'event'")
+    elif filter_type == 'media':
+        where_clauses.append("p.media_type IN ('image', 'video')")
+    
+    if where_clauses:
+        base_query += " WHERE " + " AND ".join(where_clauses)
+        
+    base_query += " ORDER BY p.created_at DESC"
+
+    cursor.execute(base_query, tuple(params))
     posts_db = cursor.fetchall()
     
     posts_list = []

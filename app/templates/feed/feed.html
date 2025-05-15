@@ -55,17 +55,21 @@ head_css %}
     <div class="profile-highlights">
       <h3>Destaques</h3>
       <div class="highlights-container">
-        <div class="highlight">
+        <div class="highlight" data-filter="audio">
           <div class="highlight-img"><i class="fas fa-music"></i></div>
           <span>Músicas</span>
         </div>
-        <div class="highlight">
-          <div class="highlight-img"><i class="fas fa-microphone"></i></div>
-          <span>Shows</span>
+        <div class="highlight" data-filter="event">
+          <div class="highlight-img"><i class="fas fa-calendar-alt"></i></div>
+          <span>Eventos</span>
         </div>
-        <div class="highlight">
-          <div class="highlight-img"><i class="fas fa-camera"></i></div>
-          <span>Fotos</span>
+        <div class="highlight" data-filter="media">
+          <div class="highlight-img"><i class="fas fa-photo-video"></i></div>
+          <span>Mídia</span>
+        </div>
+        <div class="highlight" data-filter="all">
+          <div class="highlight-img"><i class="fas fa-globe"></i></div>
+          <span>Todos</span>
         </div>
       </div>
     </div>
@@ -81,20 +85,26 @@ head_css %}
             id="postContent"
             name="content"
             placeholder="No que você está pensando, {{ session.user_name or 'Artista' }}?"
-            required
           ></textarea>
         </div>
         <div class="form-group file-input-group">
-          <label for="postImage" class="file-label"
-            ><i class="fas fa-image"></i> Adicionar Imagem</label
+          <label for="postMedia" class="file-label"
+            ><i class="fas fa-photo-video"></i> Adicionar Mídia</label
           >
           <input
             type="file"
-            id="postImage"
-            name="image"
-            accept="image/png, image/jpeg, image/gif"
+            id="postMedia"
+            name="media"
+            accept="image/png, image/jpeg, image/gif, video/mp4, video/webm, video/ogg, audio/mp3, audio/wav"
           />
-          <span id="postImageName" class="file-name-display"></span>
+          <span id="postMediaName" class="file-name-display"></span>
+        </div>
+        <div class="form-group">
+          <label for="postType">Tipo de Post:</label>
+          <select id="postType" name="post_type">
+            <option value="publication" selected>Publicação</option>
+            <option value="event">Evento</option>
+          </select>
         </div>
         <button type="submit" class="submit-post-button">Publicar</button>
       </form>

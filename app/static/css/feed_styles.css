@@ -6,10 +6,9 @@
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   overflow: hidden;
-  margin-top: 10px;
-  height: calc(
-    100vh - 120px
-  ); /* Ajuste conforme altura do header.logo-container */
+  margin-top: 0px;
+  margin-bottom: 10px;
+  height: calc(100vh - 120px);
 }
 
 .sidebar {
@@ -140,19 +139,39 @@
 .highlights-container {
   display: flex;
   justify-content: space-around;
+  flex-wrap: wrap;
+  gap: 5px;
 }
 
 .highlight {
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 30%;
+  width: calc(50% - 10px);
   text-align: center;
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+.highlight:hover {
+  background-color: #e0e0e0;
+}
+.highlight.active-filter {
+  background-color: var(--secondary-color);
+  color: var(--quantum);
+}
+.highlight.active-filter .highlight-img i {
+  color: var(--quantum);
+}
+.highlight.active-filter span {
+  color: var(--quantum);
+  font-weight: bold;
 }
 
 .highlight-img {
-  width: 50px;
-  height: 50px;
+  width: 45px;
+  height: 45px;
   border-radius: 50%;
   background-color: #f8f8f8;
   display: flex;
@@ -163,12 +182,12 @@
 }
 
 .highlight-img i {
-  font-size: 18px;
+  font-size: 16px;
   color: var(--primary-color);
 }
 
 .highlight span {
-  font-size: 0.7em;
+  font-size: 0.65em;
   color: #555;
 }
 
@@ -215,6 +234,20 @@
 .create-post-section .form-group {
   margin-bottom: 15px;
 }
+.create-post-section .form-group label {
+  display: block;
+  font-size: 0.9em;
+  color: #555;
+  margin-bottom: 5px;
+}
+.create-post-section .form-group select {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 0.9em;
+  background-color: var(--smoke-white);
+}
 
 .create-post-section textarea {
   width: 100%;
@@ -255,7 +288,7 @@
   margin-right: 5px;
 }
 
-#postImage {
+#postMedia {
   display: none;
 }
 
@@ -310,6 +343,7 @@
   display: flex;
   align-items: center;
   margin-bottom: 12px;
+  position: relative;
 }
 
 .post-header .avatar {
@@ -330,6 +364,7 @@
 .post-author-info {
   display: flex;
   flex-direction: column;
+  flex-grow: 1;
 }
 
 .post-header .artist-name {
@@ -344,15 +379,27 @@
   font-size: 0.75em;
 }
 
+.post-type-indicator {
+  position: absolute;
+  top: 0;
+  right: 0;
+  font-size: 1.2em;
+  color: var(--primary-color);
+}
+.post-type-icon {
+  opacity: 0.7;
+}
+
 .post-content .publication-text {
   margin-bottom: 10px;
   color: #343a40;
   font-size: 0.95em;
   line-height: 1.5;
   white-space: pre-wrap;
+  word-break: break-word;
 }
 
-.publication-image {
+.publication-media {
   width: 100%;
   max-height: 450px;
   overflow: hidden;
@@ -360,14 +407,21 @@
   margin-top: 10px;
   margin-bottom: 12px;
   background-color: #f0f0f0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-.publication-image img {
+.publication-media img,
+.publication-media video {
   width: 100%;
   height: auto;
   display: block;
-  object-fit: cover;
+  object-fit: contain;
   max-height: 450px;
+}
+.publication-media audio {
+  width: 100%;
 }
 
 .post-stats {
@@ -382,7 +436,7 @@
 
 .post-actions {
   display: flex;
-  align-items: center; /* Alinha verticalmente os botões */
+  align-items: center;
 }
 
 .post-actions button {
@@ -409,10 +463,10 @@
 }
 
 .post-actions button.liked {
-  color: var(--red); /* Cor para botão curtido */
+  color: var(--red);
 }
 .post-actions button.liked i.fa-heart {
-  font-weight: 900; /* Ícone sólido para curtido */
+  font-weight: 900;
 }
 
 .comments-section {
@@ -422,7 +476,7 @@
 }
 
 .comments-list {
-  max-height: 200px; /* Limita altura da lista de comentários */
+  max-height: 200px;
   overflow-y: auto;
   margin-bottom: 15px;
 }
@@ -483,7 +537,7 @@
   flex-grow: 1;
   padding: 8px 10px;
   border: 1px solid #ccc;
-  border-radius: 15px; /* Bordas mais arredondadas */
+  border-radius: 15px;
   font-size: 0.9em;
   background-color: var(--white);
 }
@@ -549,6 +603,9 @@
   .main-content {
     max-height: none;
   }
+  .highlight {
+    width: calc(33.33% - 10px);
+  }
 }
 
 @media (max-width: 480px) {
@@ -602,5 +659,18 @@
   .add-comment-form .submit-comment-button {
     font-size: 0.8em;
     padding: 7px 12px;
+  }
+  .highlight {
+    width: calc(50% - 10px);
+  }
+  .highlight-img {
+    width: 40px;
+    height: 40px;
+  }
+  .highlight-img i {
+    font-size: 14px;
+  }
+  .highlight span {
+    font-size: 0.6em;
   }
 }
