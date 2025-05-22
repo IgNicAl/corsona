@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             try {
-                const data = await apiRequest('/auth/login', 'POST', { identifier, password });
+                const data = await apiRequest('/login', 'POST', { identifier, password });
                 if (data.user) {
                     window.location.href = '/feed/';
                 } else {
@@ -66,10 +66,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             try {
-                const data = await apiRequest('/auth/register', 'POST', { name, username, email, password });
+                const data = await apiRequest('/register', 'POST', { name, username, email, password });
                 alert(data.message || 'Cadastro realizado com sucesso!');
                 if (data.message && data.message.toLowerCase().includes('sucesso')) {
-                    window.location.href = '/auth/login';
+                    window.location.href = '/login';
                 }
             } catch (error) {
             }

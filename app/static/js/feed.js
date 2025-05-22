@@ -392,7 +392,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         await loadPosts(currentFilter);
         if (error.message && (error.message.includes("Autenticação requerida") || error.message.includes("Usuário não encontrado"))) {
             alert("Sua sessão expirou ou você não está autenticado. Redirecionando para o login.");
-            window.location.href = '/auth/login';
+            window.location.href = '/login';
         }
     }
 
@@ -400,9 +400,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (logoutButton) {
         logoutButton.addEventListener('click', async () => {
             try {
-                await apiRequest('/auth/logout', 'POST');
+                await apiRequest('/logout', 'POST');
                 window.currentUserData = null;
-                window.location.href = '/auth/login';
+                window.location.href = '/login';
             } catch (error) {
             }
         });
