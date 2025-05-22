@@ -104,9 +104,6 @@ DB_HOST=localhost
 DB_USER=seu_usuario_mysql
 DB_PASSWORD=sua_senha_mysql
 DB_NAME=corsona
-SECRET_KEY=gere_uma_chave_secreta_forte_e_aleatoria_aqui
-FLASK_APP=main.py
-FLASK_DEBUG=True
 ```
 
 - **`DB_USER`** e **`DB_PASSWORD`**: Suas credenciais do MySQL.
