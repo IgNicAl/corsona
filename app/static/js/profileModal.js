@@ -14,6 +14,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const bioCharCount = document.getElementById('bioCharCount');
     const emailDisplay = document.getElementById('emailDisplay');
 
+    const rgDisplay = document.getElementById('rgDisplay');
+    const cpfDisplay = document.getElementById('cpfDisplay');
+    const instagramLinkInputModal = document.getElementById('instagramLinkInputModal');
+
     const currentPasswordInput = document.getElementById('currentPassword');
     const newPasswordInput = document.getElementById('newPassword');
     const confirmPasswordInput = document.getElementById('confirmPassword');
@@ -98,6 +102,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 avatarPreviewContainer.style.backgroundPosition = '50% 50%';
                 avatarPreviewContainer.style.backgroundSize = 'cover';
             }
+
+            if (user.actor_type === 'artist') {
+                if (rgDisplay) rgDisplay.textContent = user.rg || 'N/A';
+                if (cpfDisplay) cpfDisplay.textContent = user.cpf || 'N/A';
+                if (instagramLinkInputModal) instagramLinkInputModal.value = user.instagram_link || '';
+            } else {
+                if (rgDisplay) rgDisplay.textContent = 'N/A';
+                if (cpfDisplay) cpfDisplay.textContent = 'N/A';
+                if (instagramLinkInputModal) instagramLinkInputModal.value = '';
+            }
             updateBioCharCount();
         } else {
             nameInput.value = '';
@@ -107,6 +121,10 @@ document.addEventListener('DOMContentLoaded', () => {
             avatarPreviewContainer.style.backgroundImage = `url('${defaultAvatarUrlInModal}')`;
             avatarPreviewContainer.style.backgroundPosition = '50% 50%';
             avatarPreviewContainer.style.backgroundSize = 'cover';
+
+            if (rgDisplay) rgDisplay.textContent = 'N/A';
+            if (cpfDisplay) cpfDisplay.textContent = 'N/A';
+            if (instagramLinkInputModal) instagramLinkInputModal.value = '';
             updateBioCharCount();
         }
     };
@@ -251,12 +269,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 formData.append('avatar', avatarFile);
             }
 
+            // Adicionar instagram_link se for artista e o campo existir
+            if (window.currentUserData && window.currentUserData.actor_type === 'artist' && instagramLinkInputModal) {
+                formData.append('instagram_link', instagramLinkInputModal.value.trim());
+            }
+            // RG e CPF não são mais enviados pois são fixos na edição
+
             try {
                 const result = await apiRequest('/profile/api/user/update', 'POST', formData, true);
                 alert(result.message || "Perfil atualizado com sucesso!");
                 closeModal();
                 document.dispatchEvent(new CustomEvent('profileUpdatedGlobal', { detail: { user: result.user } }));
             } catch (error) {
+                // O tratamento de erro já é feito em apiService
             }
         });
     }

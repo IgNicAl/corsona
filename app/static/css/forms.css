@@ -31,7 +31,8 @@
 
 .form-box input[type="text"],
 .form-box input[type="email"],
-.form-box input[type="password"] {
+.form-box input[type="password"],
+.form-box input[type="url"] {
   width: 100%;
   padding: 12px 15px;
   border: 1px solid var(--matte-gray);
@@ -75,4 +76,14 @@
 .form-box .form-link-container a {
   color: var(--primary-color);
   font-weight: bold;
+}
+
+.form-select {
+  width: 100%;
+  padding: 12px 15px;
+  border: 1px solid var(--matte-gray);
+  border-radius: 5px;
+  font-size: 1em;
+  background-color: var(--white);
+  color: var(--quantum);
 }

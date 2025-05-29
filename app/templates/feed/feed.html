@@ -23,12 +23,16 @@ head_css %}
         <div
           class="profile-img"
           id="sidebarProfileAvatar"
-          style="background-image: url('{{ url_for('static', filename='images/logos/avatar-default.svg') }}');"
+          style="background-image: url('{{ session.user_avatar_path or url_for('static', filename='images/logos/avatar-default.svg') }}'); background-position: {{ session.user_avatar_position or 'center' }}; background-size: {{ session.user_avatar_size or 'cover' }};"
         ></div>
       </div>
       <div class="profile-info">
-        <h2 class="profile-name" id="userName">Carregando...</h2>
-        <p class="profile-username" id="userUsername">@carregando</p>
+        <h2 class="profile-name" id="userName">
+          {{ session.user_name or 'Carregando...' }}
+        </h2>
+        <p class="profile-username" id="userUsername">
+          @{{ session.user_username or 'carregando' }}
+        </p>
         <button id="editProfileButton" class="profile-edit-button">
           Editar Perfil
         </button>
@@ -67,7 +71,7 @@ head_css %}
           <div class="highlight-img"><i class="fas fa-photo-video"></i></div>
           <span>Mídia</span>
         </div>
-        <div class="highlight" data-filter="all">
+        <div class="highlight active-filter" data-filter="all">
           <div class="highlight-img"><i class="fas fa-globe"></i></div>
           <span>Todos</span>
         </div>
@@ -77,6 +81,7 @@ head_css %}
   </aside>
 
   <main class="main-content">
+    {% if session.actor_type == 'artist' %}
     <div class="create-post-section">
       <h3>Criar Nova Publicação</h3>
       <form id="createPostForm">
@@ -84,7 +89,7 @@ head_css %}
           <textarea
             id="postContent"
             name="content"
-            placeholder="No que você está pensando, {{ session.user_name or 'Artista' }}?"
+            placeholder="No que você está pensando?"
           ></textarea>
         </div>
         <div class="form-group file-input-group">
@@ -109,10 +114,11 @@ head_css %}
         <button type="submit" class="submit-post-button">Publicar</button>
       </form>
     </div>
+    {% endif %}
 
     <h1 class="feed-title">Publicações Recentes</h1>
     <div id="postsContainer">
-      <div class="post-placeholder" id="postPlaceholder">
+      <div class="post-placeholder" id="postPlaceholder" style="display: none">
         <p>Nenhuma publicação para exibir no momento.</p>
         <p><i class="fas fa-stream fa-2x"></i></p>
       </div>
@@ -134,7 +140,7 @@ head_css %}
             <div
               id="avatarPreviewContainer"
               class="avatar-preview"
-              style="background-image: url('{{ url_for('static', filename='images/logos/avatar-default.svg') }}');"
+              style="background-image: url('{{ session.user_avatar_path or url_for('static', filename='images/logos/avatar-default.svg') }}'); background-position: {{ session.user_avatar_position or 'center' }}; background-size: {{ session.user_avatar_size or 'cover' }};"
             ></div>
             <input
               type="file"
@@ -172,8 +178,32 @@ head_css %}
         </div>
         <div class="form-group">
           <label>Email</label>
-          <p id="emailDisplay" class="info-display">seuemail@example.com</p>
+          <p id="emailDisplay" class="info-display">
+            {{ session.user_email or 'N/A' }}
+          </p>
         </div>
+        {% if session.actor_type == 'artist' %}
+        <hr class="divider" />
+        <div class="artist-specific-fields-edit">
+          <h3>Detalhes do Artista</h3>
+          <div class="form-group">
+            <label>RG</label>
+            <p id="rgDisplay" class="info-display"></p>
+          </div>
+          <div class="form-group">
+            <label>CPF</label>
+            <p id="cpfDisplay" class="info-display"></p>
+          </div>
+          <div class="form-group">
+            <label for="instagramLinkInputModal">Link do Instagram</label>
+            <input
+              type="url"
+              id="instagramLinkInputModal"
+              name="instagram_link"
+            />
+          </div>
+        </div>
+        {% endif %}
       </form>
       <hr class="divider" />
       <div class="password-section">

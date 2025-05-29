@@ -12,14 +12,25 @@ def feed_page():
 @login_required
 @db_handler
 def get_current_user_api(cursor):
-    user_id = session["user_id"]
-    cursor.execute(
-        "SELECT id, name, username, email, bio, avatar_path, avatar_position, avatar_size FROM users WHERE id = %s",
-        (user_id,),
-    )
-    user_db_row = cursor.fetchone()
-    if user_db_row:
-        return jsonify({"user": serialize_user(user_db_row)}), 200
+    actor_id = session["actor_id"]
+    actor_type = session["actor_type"]
+    
+    user_data_db = None
+    if actor_type == "user":
+        cursor.execute(
+            "SELECT id, name, username, email, bio, avatar_path, avatar_position, avatar_size FROM users WHERE id = %s",
+            (actor_id,),
+        )
+        user_data_db = cursor.fetchone()
+    elif actor_type == "artist":
+        cursor.execute(
+            "SELECT id, name, username, email, bio, avatar_path, avatar_position, avatar_size, rg, cpf, instagram_link FROM artists WHERE id = %s",
+            (actor_id,),
+        )
+        user_data_db = cursor.fetchone()
+
+    if user_data_db:
+        return jsonify({"user": serialize_user(user_data_db, actor_type)}), 200
 
     session.clear()
     return jsonify({"message": "Usuário não encontrado, sessão encerrada."}), 404
@@ -28,7 +39,12 @@ def get_current_user_api(cursor):
 @login_required
 @db_handler
 def create_post_api(cursor):
-    user_id = session["user_id"]
+    actor_id = session["actor_id"]
+    actor_type = session["actor_type"]
+
+    if actor_type != "artist":
+        return jsonify({"message": "Apenas artistas podem criar publicações."}), 403
+
     content = request.form.get("content")
     media_file = request.files.get("media")
     post_type = request.form.get("post_type", "publication")
@@ -51,21 +67,33 @@ def create_post_api(cursor):
 
     try:
         cursor.execute(
-            "INSERT INTO posts (user_id, content, media_path, media_type, post_type) VALUES (%s, %s, %s, %s, %s)",
-            (user_id, content if content else '', media_path, media_type_name, post_type)
+            "INSERT INTO posts (actor_id, actor_type, content, media_path, media_type, post_type) VALUES (%s, %s, %s, %s, %s, %s)",
+            (actor_id, actor_type, content if content else '', media_path, media_type_name, post_type)
         )
         new_post_id = cursor.lastrowid
         
-        cursor.execute("""
-            SELECT p.id, p.user_id, p.content, p.media_path, p.media_type, p.post_type, p.created_at, 
-                   u.username, u.name as user_name, u.avatar_path as user_avatar_path,
-                   (SELECT COUNT(*) FROM likes WHERE post_id = p.id) as like_count,
-                   EXISTS(SELECT 1 FROM likes WHERE post_id = p.id AND user_id = %s) as liked_by_current_user,
-                   (SELECT COUNT(*) FROM comments WHERE post_id = p.id) as comment_count
+        query_new_post = f"""
+            SELECT 
+                p.id, p.actor_id AS user_id, p.actor_type, p.content, p.media_path, p.media_type, p.post_type, p.created_at,
+                CASE
+                    WHEN p.actor_type = 'user' THEN (SELECT u.username FROM users u WHERE u.id = p.actor_id)
+                    WHEN p.actor_type = 'artist' THEN (SELECT a.username FROM artists a WHERE a.id = p.actor_id)
+                END as username,
+                CASE
+                    WHEN p.actor_type = 'user' THEN (SELECT u.name FROM users u WHERE u.id = p.actor_id)
+                    WHEN p.actor_type = 'artist' THEN (SELECT a.name FROM artists a WHERE a.id = p.actor_id)
+                END as user_name,
+                CASE
+                    WHEN p.actor_type = 'user' THEN (SELECT u.avatar_path FROM users u WHERE u.id = p.actor_id)
+                    WHEN p.actor_type = 'artist' THEN (SELECT a.avatar_path FROM artists a WHERE a.id = p.actor_id)
+                END as user_avatar_path,
+                (SELECT COUNT(*) FROM likes WHERE post_id = p.id) as like_count,
+                EXISTS(SELECT 1 FROM likes WHERE post_id = p.id AND actor_id = %s AND actor_type = %s) as liked_by_current_user,
+                (SELECT COUNT(*) FROM comments WHERE post_id = p.id) as comment_count
             FROM posts p
-            JOIN users u ON p.user_id = u.id
             WHERE p.id = %s
-        """, (user_id, new_post_id))
+        """
+        cursor.execute(query_new_post, (session["actor_id"], session["actor_type"], new_post_id))
         new_post = cursor.fetchone()
 
         if new_post:
@@ -80,20 +108,32 @@ def create_post_api(cursor):
 @login_required
 @db_handler
 def get_posts_api(cursor):
-    current_user_id = session["user_id"]
+    current_actor_id = session["actor_id"]
+    current_actor_type = session["actor_type"]
     filter_type = request.args.get('filter')
 
     base_query = """
-        SELECT p.id, p.user_id, p.content, p.media_path, p.media_type, p.post_type, p.created_at, 
-               u.username, u.name as user_name, u.avatar_path as user_avatar_path,
-               (SELECT COUNT(*) FROM likes WHERE post_id = p.id) as like_count,
-               EXISTS(SELECT 1 FROM likes WHERE post_id = p.id AND user_id = %s) as liked_by_current_user,
-               (SELECT COUNT(*) FROM comments WHERE post_id = p.id) as comment_count
+        SELECT 
+            p.id, p.actor_id AS user_id, p.actor_type, p.content, p.media_path, p.media_type, p.post_type, p.created_at,
+            CASE
+                WHEN p.actor_type = 'user' THEN (SELECT u.username FROM users u WHERE u.id = p.actor_id)
+                WHEN p.actor_type = 'artist' THEN (SELECT a.username FROM artists a WHERE a.id = p.actor_id)
+            END as username,
+            CASE
+                WHEN p.actor_type = 'user' THEN (SELECT u.name FROM users u WHERE u.id = p.actor_id)
+                WHEN p.actor_type = 'artist' THEN (SELECT a.name FROM artists a WHERE a.id = p.actor_id)
+            END as user_name,
+            CASE
+                WHEN p.actor_type = 'user' THEN (SELECT u.avatar_path FROM users u WHERE u.id = p.actor_id)
+                WHEN p.actor_type = 'artist' THEN (SELECT a.avatar_path FROM artists a WHERE a.id = p.actor_id)
+            END as user_avatar_path,
+            (SELECT COUNT(*) FROM likes WHERE post_id = p.id) as like_count,
+            EXISTS(SELECT 1 FROM likes WHERE post_id = p.id AND actor_id = %s AND actor_type = %s) as liked_by_current_user,
+            (SELECT COUNT(*) FROM comments WHERE post_id = p.id) as comment_count
         FROM posts p
-        JOIN users u ON p.user_id = u.id
     """
     
-    params = [current_user_id]
+    params = [current_actor_id, current_actor_type]
     where_clauses = []
 
     if filter_type == 'audio':
@@ -123,20 +163,21 @@ def get_posts_api(cursor):
 @login_required
 @db_handler
 def toggle_like_post_api(cursor, post_id):
-    user_id = session["user_id"]
+    actor_id = session["actor_id"]
+    actor_type = session["actor_type"]
     
     cursor.execute("SELECT id FROM posts WHERE id = %s", (post_id,))
     if not cursor.fetchone():
         return jsonify({"message": "Post não encontrado."}), 404
 
-    cursor.execute("SELECT id FROM likes WHERE user_id = %s AND post_id = %s", (user_id, post_id))
+    cursor.execute("SELECT id FROM likes WHERE actor_id = %s AND actor_type = %s AND post_id = %s", (actor_id, actor_type, post_id))
     like = cursor.fetchone()
 
     if like:
-        cursor.execute("DELETE FROM likes WHERE user_id = %s AND post_id = %s", (user_id, post_id))
+        cursor.execute("DELETE FROM likes WHERE actor_id = %s AND actor_type = %s AND post_id = %s", (actor_id, actor_type, post_id))
         liked = False
     else:
-        cursor.execute("INSERT INTO likes (user_id, post_id) VALUES (%s, %s)", (user_id, post_id))
+        cursor.execute("INSERT INTO likes (actor_id, actor_type, post_id) VALUES (%s, %s, %s)", (actor_id, actor_type, post_id))
         liked = True
     
     cursor.execute("SELECT COUNT(*) as count FROM likes WHERE post_id = %s", (post_id,))
@@ -148,7 +189,8 @@ def toggle_like_post_api(cursor, post_id):
 @login_required
 @db_handler
 def add_comment_api(cursor, post_id):
-    user_id = session["user_id"]
+    actor_id = session["actor_id"]
+    actor_type = session["actor_type"]
     data = request.get_json()
     content = data.get("content")
 
@@ -160,18 +202,30 @@ def add_comment_api(cursor, post_id):
         return jsonify({"message": "Post não encontrado."}), 404
     
     cursor.execute(
-        "INSERT INTO comments (user_id, post_id, content) VALUES (%s, %s, %s)",
-        (user_id, post_id, content.strip())
+        "INSERT INTO comments (actor_id, actor_type, post_id, content) VALUES (%s, %s, %s, %s)",
+        (actor_id, actor_type, post_id, content.strip())
     )
     new_comment_id = cursor.lastrowid
 
-    cursor.execute("""
-        SELECT c.id, c.user_id, c.post_id, c.content, c.created_at,
-               u.username, u.name as user_name, u.avatar_path as user_avatar_path
+    query_new_comment = f"""
+        SELECT 
+            c.id, c.actor_id AS user_id, c.actor_type, c.post_id, c.content, c.created_at,
+            CASE
+                WHEN c.actor_type = 'user' THEN (SELECT u.username FROM users u WHERE u.id = c.actor_id)
+                WHEN c.actor_type = 'artist' THEN (SELECT a.username FROM artists a WHERE a.id = c.actor_id)
+            END as username,
+            CASE
+                WHEN c.actor_type = 'user' THEN (SELECT u.name FROM users u WHERE u.id = c.actor_id)
+                WHEN c.actor_type = 'artist' THEN (SELECT a.name FROM artists a WHERE a.id = c.actor_id)
+            END as user_name,
+            CASE
+                WHEN c.actor_type = 'user' THEN (SELECT u.avatar_path FROM users u WHERE u.id = c.actor_id)
+                WHEN c.actor_type = 'artist' THEN (SELECT a.avatar_path FROM artists a WHERE a.id = c.actor_id)
+            END as user_avatar_path
         FROM comments c
-        JOIN users u ON c.user_id = u.id
         WHERE c.id = %s
-    """, (new_comment_id,))
+    """
+    cursor.execute(query_new_comment, (new_comment_id,))
     new_comment = cursor.fetchone()
     if new_comment:
         new_comment['created_at'] = new_comment['created_at'].isoformat() if new_comment.get('created_at') else None
@@ -189,14 +243,26 @@ def get_comments_api(cursor, post_id):
     if not cursor.fetchone():
         return jsonify({"message": "Post não encontrado."}), 404
 
-    cursor.execute("""
-        SELECT c.id, c.user_id, c.post_id, c.content, c.created_at,
-               u.username, u.name as user_name, u.avatar_path as user_avatar_path
+    query_comments = f"""
+        SELECT 
+            c.id, c.actor_id AS user_id, c.actor_type, c.post_id, c.content, c.created_at,
+            CASE
+                WHEN c.actor_type = 'user' THEN (SELECT u.username FROM users u WHERE u.id = c.actor_id)
+                WHEN c.actor_type = 'artist' THEN (SELECT a.username FROM artists a WHERE a.id = c.actor_id)
+            END as username,
+            CASE
+                WHEN c.actor_type = 'user' THEN (SELECT u.name FROM users u WHERE u.id = c.actor_id)
+                WHEN c.actor_type = 'artist' THEN (SELECT a.name FROM artists a WHERE a.id = c.actor_id)
+            END as user_name,
+            CASE
+                WHEN c.actor_type = 'user' THEN (SELECT u.avatar_path FROM users u WHERE u.id = c.actor_id)
+                WHEN c.actor_type = 'artist' THEN (SELECT a.avatar_path FROM artists a WHERE a.id = c.actor_id)
+            END as user_avatar_path
         FROM comments c
-        JOIN users u ON c.user_id = u.id
         WHERE c.post_id = %s
         ORDER BY c.created_at ASC
-    """, (post_id,))
+    """
+    cursor.execute(query_comments, (post_id,))
     comments_db = cursor.fetchall()
 
     comments_list = []

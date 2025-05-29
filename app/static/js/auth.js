@@ -28,6 +28,39 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const registerForm = document.getElementById('registerForm');
     if (registerForm) {
+        const userTypeSelect = document.getElementById('user_type');
+        const artistFieldsDiv = document.getElementById('artistFieldsDiv');
+        const rgInput = document.getElementById('rg');
+        const cpfInput = document.getElementById('cpf');
+        const instagramInput = document.getElementById('instagram_link');
+
+        if (userTypeSelect && artistFieldsDiv) {
+            userTypeSelect.addEventListener('change', function () {
+                if (this.value === 'artist') {
+                    artistFieldsDiv.style.display = 'block';
+                } else {
+                    artistFieldsDiv.style.display = 'none';
+                }
+            });
+        }
+
+        if (cpfInput) {
+            cpfInput.addEventListener('input', function (e) {
+                let value = e.target.value.replace(/\D/g, '');
+                if (value.length > 11) value = value.substring(0, 11);
+
+                if (value.length > 9) {
+                    value = value.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+                } else if (value.length > 6) {
+                    value = value.replace(/(\d{3})(\d{3})(\d{1,3})/, '$1.$2.$3');
+                } else if (value.length > 3) {
+                    value = value.replace(/(\d{3})(\d{1,3})/, '$1.$2');
+                }
+                e.target.value = value;
+            });
+        }
+
+
         registerForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const nameInput = document.getElementById('name');
@@ -41,6 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const email = emailInput.value.trim();
             const password = passwordInput.value;
             const confirmPassword = confirmPasswordInput.value;
+            const user_type = userTypeSelect.value;
 
             const nameRegex = /^[A-Za-zÀ-ú\s]+$/;
             if (!nameRegex.test(name)) {
@@ -56,8 +90,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert('Por favor, insira um endereço de e-mail válido.');
                 return;
             }
-            if (password.length < 6) {
-                alert('A senha deve ter pelo menos 6 caracteres.');
+            if (password.length < 8) {
+                alert('A senha deve ter pelo menos 8 caracteres.');
                 return;
             }
             if (password !== confirmPassword) {
@@ -65,8 +99,36 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
+            const registrationData = {
+                name,
+                username,
+                email,
+                password,
+                user_type
+            };
+
+            if (user_type === 'artist') {
+                const rg = rgInput.value.trim();
+                const cpf = cpfInput.value.trim();
+                const instagram_link = instagramInput.value.trim();
+
+                if (!rg) {
+                    alert('RG é obrigatório para artistas.'); return;
+                }
+                if (!cpf) {
+                    alert('CPF é obrigatório para artistas.'); return;
+                }
+                if (!instagram_link) {
+                    alert('Link do Instagram é obrigatório para artistas.'); return;
+                }
+
+                registrationData.rg = rg;
+                registrationData.cpf = cpf;
+                registrationData.instagram_link = instagram_link;
+            }
+
             try {
-                const data = await apiRequest('/register', 'POST', { name, username, email, password });
+                const data = await apiRequest('/register', 'POST', registrationData);
                 alert(data.message || 'Cadastro realizado com sucesso!');
                 if (data.message && data.message.toLowerCase().includes('sucesso')) {
                     window.location.href = '/login';

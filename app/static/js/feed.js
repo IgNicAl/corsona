@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const postMediaInput = document.getElementById('postMedia');
     const postMediaNameDisplay = document.getElementById('postMediaName');
     const postTypeInput = document.getElementById('postType');
+
     const postsContainer = document.getElementById('postsContainer');
     const postPlaceholder = document.getElementById('postPlaceholder');
     const highlightsContainer = document.querySelector('.highlights-container');
@@ -40,9 +41,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 sidebarProfileAvatar.style.backgroundPosition = 'center';
                 sidebarProfileAvatar.style.backgroundSize = 'cover';
             }
-            if (postContentInput) {
-                postContentInput.placeholder = `No que você está pensando, ${user.name || 'Artista'}?`;
-            }
+
         } else {
             profileName.textContent = 'Carregando...';
             profileUsername.textContent = '@carregando';
@@ -289,6 +288,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const loadPosts = async (filter = 'all') => {
         if (!postsContainer || !postPlaceholder) return;
+        postPlaceholder.style.display = 'none';
+        postsContainer.innerHTML = '<p>Carregando publicações...</p>';
+
         try {
             const endpoint = filter === 'all' ? '/feed/api/posts' : `/feed/api/posts?filter=${filter}`;
             const data = await apiRequest(endpoint, 'GET');
@@ -299,7 +301,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                     postsContainer.appendChild(renderPost(post, window.currentUserData));
                 });
                 if (window.currentUserData && userPostCountElement && filter === 'all') {
-                    const userPosts = data.posts.filter(p => p.user_id === window.currentUserData.id);
+                    const userActorId = window.currentUserData.id;
+                    const userPosts = data.posts.filter(p => p.user_id === userActorId);
                     userPostCountElement.textContent = userPosts.length;
                 }
 
@@ -318,11 +321,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     };
 
-
     if (createPostForm) {
         createPostForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            if (!postContentInput || !postTypeInput) return;
+            if (!postContentInput || !postTypeInput) {
+                console.error("Elementos do formulário de criação de post não encontrados.");
+                return;
+            }
 
             const content = postContentInput.value.trim();
             const mediaFile = postMediaInput ? postMediaInput.files[0] : null;
@@ -353,17 +358,18 @@ document.addEventListener('DOMContentLoaded', async () => {
             } catch (error) {
             }
         });
+
+        if (postMediaInput && postMediaNameDisplay) {
+            postMediaInput.addEventListener('change', () => {
+                if (postMediaInput.files.length > 0) {
+                    postMediaNameDisplay.textContent = postMediaInput.files[0].name;
+                } else {
+                    postMediaNameDisplay.textContent = '';
+                }
+            });
+        }
     }
 
-    if (postMediaInput && postMediaNameDisplay) {
-        postMediaInput.addEventListener('change', () => {
-            if (postMediaInput.files.length > 0) {
-                postMediaNameDisplay.textContent = postMediaInput.files[0].name;
-            } else {
-                postMediaNameDisplay.textContent = '';
-            }
-        });
-    }
 
     if (highlightsContainer) {
         highlightsContainer.addEventListener('click', (e) => {
@@ -378,23 +384,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     try {
-        const userData = await apiRequest('/feed/api/user', 'GET');
-        if (userData.user) {
-            updateProfileUI(userData.user);
-            window.currentUserData = userData.user;
-            await loadPosts(currentFilter);
+        const userDataResponse = await apiRequest('/feed/api/user', 'GET');
+        if (userDataResponse.user) {
+            window.currentUserData = userDataResponse.user;
+            updateProfileUI(window.currentUserData);
         } else {
             updateProfileUI(null);
-            await loadPosts(currentFilter);
         }
     } catch (error) {
         updateProfileUI(null);
-        await loadPosts(currentFilter);
         if (error.message && (error.message.includes("Autenticação requerida") || error.message.includes("Usuário não encontrado"))) {
-            alert("Sua sessão expirou ou você não está autenticado. Redirecionando para o login.");
             window.location.href = '/login';
+            return;
         }
     }
+
+    await loadPosts(currentFilter);
 
     const logoutButton = document.getElementById('logoutButton');
     if (logoutButton) {
@@ -402,7 +407,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             try {
                 await apiRequest('/logout', 'POST');
                 window.currentUserData = null;
-                window.location.href = '/login';
+                window.location.href = '/';
             } catch (error) {
             }
         });
@@ -410,8 +415,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     document.addEventListener('profileUpdatedGlobal', async (event) => {
         if (event.detail && event.detail.user) {
-            updateProfileUI(event.detail.user);
             window.currentUserData = event.detail.user;
+            updateProfileUI(window.currentUserData);
             await loadPosts(currentFilter);
         }
     });
