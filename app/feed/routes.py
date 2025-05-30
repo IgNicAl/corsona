@@ -14,7 +14,7 @@ def feed_page():
 def get_current_user_api(cursor):
     actor_id = session["actor_id"]
     actor_type = session["actor_type"]
-    
+
     user_data_db = None
     if actor_type == "user":
         cursor.execute(
@@ -53,14 +53,14 @@ def create_post_api(cursor):
         return jsonify({"message": "O post deve ter conteúdo ou uma mídia."}), 400
     if content and len(content.strip()) == 0 and not media_file:
         return jsonify({"message": "O conteúdo do post não pode ser apenas espaços em branco."}), 400
-    
+
     if post_type not in ["publication", "event"]:
         return jsonify({"message": "Tipo de post inválido."}), 400
 
     media_path = None
     media_type_name = None
     if media_file:
-        media_path = save_media_file(media_file) 
+        media_path = save_media_file(media_file)
         if not media_path:
             return jsonify({"message": "Falha ao salvar a mídia ou tipo de arquivo inválido."}), 400
         media_type_name = get_media_type(media_file.filename)
@@ -71,9 +71,9 @@ def create_post_api(cursor):
             (actor_id, actor_type, content if content else '', media_path, media_type_name, post_type)
         )
         new_post_id = cursor.lastrowid
-        
-        query_new_post = f"""
-            SELECT 
+
+        query_new_post = """
+            SELECT
                 p.id, p.actor_id AS user_id, p.actor_type, p.content, p.media_path, p.media_type, p.post_type, p.created_at,
                 CASE
                     WHEN p.actor_type = 'user' THEN (SELECT u.username FROM users u WHERE u.id = p.actor_id)
@@ -113,7 +113,7 @@ def get_posts_api(cursor):
     filter_type = request.args.get('filter')
 
     base_query = """
-        SELECT 
+        SELECT
             p.id, p.actor_id AS user_id, p.actor_type, p.content, p.media_path, p.media_type, p.post_type, p.created_at,
             CASE
                 WHEN p.actor_type = 'user' THEN (SELECT u.username FROM users u WHERE u.id = p.actor_id)
@@ -132,7 +132,7 @@ def get_posts_api(cursor):
             (SELECT COUNT(*) FROM comments WHERE post_id = p.id) as comment_count
         FROM posts p
     """
-    
+
     params = [current_actor_id, current_actor_type]
     where_clauses = []
 
@@ -142,15 +142,15 @@ def get_posts_api(cursor):
         where_clauses.append("p.post_type = 'event'")
     elif filter_type == 'media':
         where_clauses.append("p.media_type IN ('image', 'video')")
-    
+
     if where_clauses:
         base_query += " WHERE " + " AND ".join(where_clauses)
-        
+
     base_query += " ORDER BY p.created_at DESC"
 
     cursor.execute(base_query, tuple(params))
     posts_db = cursor.fetchall()
-    
+
     posts_list = []
     for post in posts_db:
         post_dict = dict(post)
@@ -165,7 +165,7 @@ def get_posts_api(cursor):
 def toggle_like_post_api(cursor, post_id):
     actor_id = session["actor_id"]
     actor_type = session["actor_type"]
-    
+
     cursor.execute("SELECT id FROM posts WHERE id = %s", (post_id,))
     if not cursor.fetchone():
         return jsonify({"message": "Post não encontrado."}), 404
@@ -179,7 +179,7 @@ def toggle_like_post_api(cursor, post_id):
     else:
         cursor.execute("INSERT INTO likes (actor_id, actor_type, post_id) VALUES (%s, %s, %s)", (actor_id, actor_type, post_id))
         liked = True
-    
+
     cursor.execute("SELECT COUNT(*) as count FROM likes WHERE post_id = %s", (post_id,))
     like_count = cursor.fetchone()['count']
 
@@ -200,15 +200,15 @@ def add_comment_api(cursor, post_id):
     cursor.execute("SELECT id FROM posts WHERE id = %s", (post_id,))
     if not cursor.fetchone():
         return jsonify({"message": "Post não encontrado."}), 404
-    
+
     cursor.execute(
         "INSERT INTO comments (actor_id, actor_type, post_id, content) VALUES (%s, %s, %s, %s)",
         (actor_id, actor_type, post_id, content.strip())
     )
     new_comment_id = cursor.lastrowid
 
-    query_new_comment = f"""
-        SELECT 
+    query_new_comment = """
+        SELECT
             c.id, c.actor_id AS user_id, c.actor_type, c.post_id, c.content, c.created_at,
             CASE
                 WHEN c.actor_type = 'user' THEN (SELECT u.username FROM users u WHERE u.id = c.actor_id)
@@ -243,8 +243,8 @@ def get_comments_api(cursor, post_id):
     if not cursor.fetchone():
         return jsonify({"message": "Post não encontrado."}), 404
 
-    query_comments = f"""
-        SELECT 
+    query_comments = """
+        SELECT
             c.id, c.actor_id AS user_id, c.actor_type, c.post_id, c.content, c.created_at,
             CASE
                 WHEN c.actor_type = 'user' THEN (SELECT u.username FROM users u WHERE u.id = c.actor_id)
@@ -270,5 +270,6 @@ def get_comments_api(cursor, post_id):
         comment_dict = dict(comment)
         comment_dict['created_at'] = comment_dict['created_at'].isoformat() if comment_dict.get('created_at') else None
         comments_list.append(comment_dict)
-        
+
     return jsonify({"comments": comments_list}), 200
+

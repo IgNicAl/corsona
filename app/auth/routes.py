@@ -58,7 +58,7 @@ def _register_user_api(cursor):
         return jsonify({"message": "O nome de usuário não pode conter espaços."}), 400
     if not re.fullmatch(r"^[^\s@]+@[^\s@]+\.[^\s@]+$", email):
         return jsonify({"message": "Formato de e-mail inválido."}), 400
-    if len(password) < 8: # Consistente com o HTML, mas o profileModal.js usava 6 para nova senha
+    if len(password) < 8:
         return jsonify({"message": "A senha deve ter pelo menos 8 caracteres."}), 400
     if actor_type_from_form not in ["user", "artist"]:
         return jsonify({"message": "Tipo de usuário inválido."}), 400
@@ -68,7 +68,7 @@ def _register_user_api(cursor):
     cursor.execute("SELECT email FROM users WHERE email = %s UNION SELECT email FROM artists WHERE email = %s", (email, email))
     if cursor.fetchone():
         return jsonify({"message": "Este e-mail já está cadastrado no sistema."}), 409
-    
+
     cursor.execute("SELECT username FROM users WHERE username = %s UNION SELECT username FROM artists WHERE username = %s", (username, username))
     if cursor.fetchone():
         return jsonify({"message": "Este nome de usuário já está em uso no sistema."}), 409
@@ -76,7 +76,7 @@ def _register_user_api(cursor):
     try:
         if actor_type_from_form == "user":
             sql = """
-                INSERT INTO users (name, username, email, password, bio, avatar_path, avatar_position, avatar_size) 
+                INSERT INTO users (name, username, email, password, bio, avatar_path, avatar_position, avatar_size)
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
             """
             val = (name, username, email, hashed_password.decode("utf-8"), None, None, '50% 50%', 'cover')
@@ -88,17 +88,15 @@ def _register_user_api(cursor):
                 return jsonify({"message": "CPF é obrigatório para artistas."}), 400
             if not is_valid_cpf(cpf_data):
                 return jsonify({"message": "CPF inválido. Verifique o formato e os dígitos."}), 400
-            if not instagram_link_data: # Instagram ainda obrigatório no registro
+            if not instagram_link_data:
                 return jsonify({"message": "Link do Instagram é obrigatório para artistas."}), 400
             if not is_valid_instagram_url(instagram_link_data):
                 return jsonify({"message": "Link do Instagram inválido."}), 400
 
-            # Verificar unicidade de RG
             cursor.execute("SELECT id FROM artists WHERE rg = %s", (rg_data,))
             if cursor.fetchone():
                 return jsonify({"message": "Este RG de artista já está cadastrado."}), 409
-            
-            # Verificar unicidade de CPF (a constraint do BD também ajudará)
+
             normalized_cpf_to_check = re.sub(r'[^0-9]', '', cpf_data)
             cursor.execute("SELECT id FROM artists WHERE REPLACE(REPLACE(cpf, '.', ''), '-', '') = %s AND cpf IS NOT NULL", (normalized_cpf_to_check,))
             if cursor.fetchone():
@@ -106,12 +104,12 @@ def _register_user_api(cursor):
 
 
             sql = """
-                INSERT INTO artists (name, username, email, password, bio, avatar_path, avatar_position, avatar_size, rg, cpf, instagram_link) 
+                INSERT INTO artists (name, username, email, password, bio, avatar_path, avatar_position, avatar_size, rg, cpf, instagram_link)
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """
             val = (name, username, email, hashed_password.decode("utf-8"), None, None, '50% 50%', 'cover', rg_data, cpf_data, instagram_link_data)
             cursor.execute(sql, val)
-        
+
         return jsonify({"message": "Cadastro realizado com sucesso! Você já pode fazer o login."}), 201
 
     except mysql.connector.Error as err_db:
@@ -148,7 +146,7 @@ def _login_user_api(cursor):
 
     identifier = data["identifier"]
     password_attempt = data["password"]
-    
+
     user_db_row = None
     actor_type = None
 
@@ -176,7 +174,7 @@ def _login_user_api(cursor):
 
     user_data_for_session = serialize_user(user_db_row, actor_type)
     update_session_with_user_data(user_data_for_session, actor_type)
-    
+
     return jsonify({"message": "Login bem-sucedido!", "user": user_data_for_session}), 200
 
 @auth_bp.route("/logout", methods=["POST"])

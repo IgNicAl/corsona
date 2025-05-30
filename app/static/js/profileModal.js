@@ -269,11 +269,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 formData.append('avatar', avatarFile);
             }
 
-            // Adicionar instagram_link se for artista e o campo existir
             if (window.currentUserData && window.currentUserData.actor_type === 'artist' && instagramLinkInputModal) {
                 formData.append('instagram_link', instagramLinkInputModal.value.trim());
             }
-            // RG e CPF não são mais enviados pois são fixos na edição
+
 
             try {
                 const result = await apiRequest('/profile/api/user/update', 'POST', formData, true);
@@ -281,7 +280,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 closeModal();
                 document.dispatchEvent(new CustomEvent('profileUpdatedGlobal', { detail: { user: result.user } }));
             } catch (error) {
-                // O tratamento de erro já é feito em apiService
+
             }
         });
     }
@@ -298,8 +297,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert('Por favor, preencha todos os campos de senha.');
                 return;
             }
-            if (newPassword.length < 6) {
-                alert('A nova senha deve ter pelo menos 6 caracteres.');
+            if (newPassword.length < 8) {
+                alert('A nova senha deve ter pelo menos 8 caracteres.');
                 return;
             }
             if (newPassword !== confirmPassword) {

@@ -21,9 +21,8 @@ def is_valid_cpf(cpf: str) -> bool:
     return resto == int(cpf_digits[10])
 
 def is_valid_instagram_url(url: str) -> bool:
-    if not url: # Se o link do instagram puder ser opcional/removido na edição
+    if not url:
         return True
-    # Se for obrigatório, a validação `if not instagram_link_data:` abaixo cuidaria disso.
     pattern = r"^(https?:\/\/)?(www\.)?instagram\.com\/[a-zA-Z0-9(\.\?)?_]+(\/)?$"
     return re.match(pattern, url) is not None
 
@@ -87,11 +86,7 @@ def update_user_profile_api(cursor):
         params_update.append(avatar_size)
 
     if current_actor_type == "artist":
-        # RG e CPF não são mais lidos/atualizados aqui porque são fixos na edição.
-        # Apenas Instagram link é atualizável.
         instagram_link_data = request.form.get("instagram_link", "").strip()
-        
-        # Se o link do Instagram for obrigatório mesmo na edição:
         if not instagram_link_data:
             return jsonify({"message": "Link do Instagram é obrigatório para artistas."}), 400
         if not is_valid_instagram_url(instagram_link_data):
@@ -113,7 +108,6 @@ def update_user_profile_api(cursor):
                  return jsonify({"message": "Este nome de usuário já está em uso."}), 409
             if "email" in error_msg_lower:
                  return jsonify({"message": "Este e-mail já está em uso."}), 409
-            # Constraints de RG/CPF não devem ser violadas aqui, pois não estão sendo alterados.
         return jsonify({"message": "Erro ao salvar dados. Verifique se as informações são únicas como nome de usuário ou e-mail."}), 500
 
     select_columns = "id, name, username, email, bio, avatar_path, avatar_position, avatar_size"
@@ -142,7 +136,7 @@ def change_password_api(cursor):
 
     if not current_password or not new_password:
         return jsonify({"message": "Senha atual e nova senha são obrigatórias."}), 400
-    if len(new_password) < 6: # JS usa 6, Auth usa 8. Manter 6 aqui conforme JS.
+    if len(new_password) < 8:
         return jsonify({"message": "A nova senha deve ter pelo menos 6 caracteres."}), 400
 
     actor_id = session["actor_id"]

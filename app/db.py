@@ -37,7 +37,6 @@ def _check_column_exists(cursor, db_name, table_name, column_name):
     return cursor.fetchone()[0] > 0
 
 def _add_unique_constraint_if_not_exists(cursor, db_name, table_name, column_name, constraint_name):
-    # Verificar se a constraint já existe
     cursor.execute(f"""
         SELECT COUNT(*)
         FROM information_schema.TABLE_CONSTRAINTS
@@ -53,11 +52,9 @@ def _add_unique_constraint_if_not_exists(cursor, db_name, table_name, column_nam
             cursor.execute(f"ALTER TABLE {table_name} ADD CONSTRAINT {constraint_name} UNIQUE ({column_name})")
             current_app.logger.info(f"Added UNIQUE constraint {constraint_name} to {table_name}.{column_name}")
         except mysql.connector.Error as err:
-            # Error 1061: Duplicate key name 'rg' (ou o nome da constraint) - significa que a constraint já existe, talvez com outro nome mas na mesma coluna.
-            # Error 1062: Duplicate entry 'valor' for key 'rg' - significa que há dados duplicados.
-            if err.errno == 1061: # Constraint já existe (talvez com outro nome mas na mesma coluna)
+            if err.errno == 1061:
                  current_app.logger.warning(f"Could not add UNIQUE constraint {constraint_name} to {table_name}.{column_name}, it might already exist or column has an index: {err}")
-            elif err.errno == 1062: # Duplicate data
+            elif err.errno == 1062:
                  current_app.logger.error(f"Could not add UNIQUE constraint {constraint_name} to {table_name}.{column_name} due to duplicate data: {err}. Manual data cleaning required.")
             else:
                  current_app.logger.error(f"Error adding UNIQUE constraint {constraint_name} to {table_name}.{column_name}: {err}")
@@ -67,8 +64,7 @@ def _add_unique_constraint_if_not_exists(cursor, db_name, table_name, column_nam
 
 def _init_db_tables():
     db = get_db()
-    cursor = db.cursor(dictionary=True) # Usar dictionary=True para _check_column_exists, mas não para DDLs simples.
-                                      # Reverter para cursor normal para DDLs
+    cursor = db.cursor(dictionary=True)
     cursor = db.cursor()
     db_name = current_app.config['DB_NAME']
 
@@ -102,7 +98,7 @@ def _init_db_tables():
             instagram_link VARCHAR(255) DEFAULT NULL
         )
     """)
-    # Adicionar constraints UNIQUE para rg e cpf na tabela artists se não existirem
+
     _add_unique_constraint_if_not_exists(cursor, db_name, 'artists', 'rg', 'uq_artists_rg')
     _add_unique_constraint_if_not_exists(cursor, db_name, 'artists', 'cpf', 'uq_artists_cpf')
 
