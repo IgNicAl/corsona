@@ -20,6 +20,16 @@
   display: flex;
   flex-direction: column;
   overflow-y: auto;
+  flex-shrink: 0;
+}
+
+.main-content {
+  padding: 20px;
+  flex-grow: 1;
+  background-color: var(--white);
+  overflow-y: auto;
+  overflow-x: auto;
+  min-width: 0;
 }
 
 .profile-header {
@@ -209,13 +219,6 @@
   background-color: var(--red);
 }
 
-.main-content {
-  padding: 20px;
-  flex-grow: 1;
-  background-color: var(--white);
-  overflow-y: auto;
-}
-
 .create-post-section {
   background-color: #fff;
   padding: 15px 20px;
@@ -325,9 +328,6 @@
   margin-bottom: 20px;
   color: var(--quantum);
   font-size: 1.6em;
-}
-
-#postsContainer {
 }
 
 .post {
@@ -469,6 +469,30 @@
   font-weight: 900;
 }
 
+.post-manage-actions {
+  position: absolute;
+  top: 0px;
+  right: 25px;
+  display: flex;
+  gap: 5px;
+}
+
+.post-manage-actions button,
+.comment-content .delete-comment-button {
+  background: none;
+  border: none;
+  color: #888;
+  cursor: pointer;
+  padding: 5px;
+  font-size: 0.9em;
+  line-height: 1;
+}
+
+.post-manage-actions button:hover,
+.comment-content .delete-comment-button:hover {
+  color: var(--red);
+}
+
 .comments-section {
   margin-top: 15px;
   padding-top: 15px;
@@ -500,6 +524,14 @@
   padding: 8px 12px;
   border-radius: 10px;
   flex-grow: 1;
+  position: relative;
+}
+
+.comment-content .delete-comment-button {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  font-size: 0.8em;
 }
 
 .comment-author-name {
@@ -574,6 +606,11 @@
 .post-placeholder p {
   margin-bottom: 10px;
   font-size: 1.1em;
+}
+
+.post.artist-highlight {
+    border: 2px solid var(--primary-color) !important;
+    box-shadow: 0 0 5px var(--primary-color);
 }
 
 @media (max-width: 768px) {
@@ -673,61 +710,4 @@
   .highlight span {
     font-size: 0.6em;
   }
-}
-
-/* In corsona/app/static/css/feed.css */
-
-/* ... (existing styles) ... */
-
-.post-header {
-  display: flex;
-  align-items: center;
-  margin-bottom: 12px;
-  position: relative; /* Added for positioning management actions */
-}
-
-.post-manage-actions {
-  position: absolute;
-  top: 0px; /* Adjust as needed */
-  right: 25px; /* Adjust to be next to post-type-indicator or as desired */
-  display: flex;
-  gap: 5px;
-}
-
-.post-manage-actions button,
-.comment-content .delete-comment-button {
-  background: none;
-  border: none;
-  color: #888; /* Light gray, less obtrusive */
-  cursor: pointer;
-  padding: 5px;
-  font-size: 0.9em; /* Smaller icon */
-  line-height: 1;
-}
-
-.post-manage-actions button:hover,
-.comment-content .delete-comment-button:hover {
-  color: var(--red); /* Or var(--primary-color) */
-}
-
-/* Positioning delete button within comment */
-.comment-content {
-  background-color: #f7f7f7;
-  padding: 8px 12px;
-  border-radius: 10px;
-  flex-grow: 1;
-  position: relative; /* For positioning delete button */
-}
-
-.comment-content .delete-comment-button {
-  position: absolute;
-  top: 5px;
-  right: 5px;
-  font-size: 0.8em; /* Even smaller for comments */
-}
-
-/* Highlight for artist's own posts from feed_artist.js manageMyPostsButton */
-.post.artist-highlight {
-    border: 2px solid var(--primary-color) !important;
-    box-shadow: 0 0 5px var(--primary-color);
 }
