@@ -1,14 +1,14 @@
 .user-feed-header-tools {
-  background-color: #f0f8ff;
+  background-color: var(--secondary-color);
   padding: 15px;
   margin-bottom: 20px;
   border-radius: 6px;
-  border: 1px solid #d1e0ff;
+  border: 1px solid var(--primary-color);
 }
 
 .user-feed-header-tools h3 {
   margin-top: 0;
-  color: var(--deep-blue);
+  color: var(--quamtum);
   font-size: 1.3em;
 }
 
@@ -29,7 +29,7 @@
 }
 
 .form-control-feed:focus {
+  outline: none;
   border-color: var(--primary-color);
-  outline: 0;
-  box-shadow: 0 0 0 0.2rem rgba(218, 106, 5, 0.25);
+  box-shadow: 0 0 0 2px rgba(218, 106, 5, 0.1);
 }
