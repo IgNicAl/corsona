@@ -10,8 +10,12 @@ head_css %}
 />
 <link
   rel="stylesheet"
+  href="{{ url_for('static', filename='css/feed_user.css') }}"
+/>
+<link
+  rel="stylesheet"
   href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
-  integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
+  xintegrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
   crossorigin="anonymous"
   referrerpolicy="no-referrer"
 />
@@ -40,10 +44,6 @@ head_css %}
     </div>
 
     <div class="profile-stats">
-      <div class="stat">
-        <span class="stat-count" id="userPostCount">0</span
-        ><span class="stat-label">Publicações</span>
-      </div>
       <div class="stat">
         <span class="stat-count">0</span
         ><span class="stat-label">Seguidores</span>
@@ -81,40 +81,11 @@ head_css %}
   </aside>
 
   <main class="main-content">
-    {% if session.actor_type == 'artist' %}
-    <div class="create-post-section">
-      <h3>Criar Nova Publicação</h3>
-      <form id="createPostForm">
-        <div class="form-group">
-          <textarea
-            id="postContent"
-            name="content"
-            placeholder="No que você está pensando?"
-          ></textarea>
-        </div>
-        <div class="form-group file-input-group">
-          <label for="postMedia" class="file-label"
-            ><i class="fas fa-photo-video"></i> Adicionar Mídia</label
-          >
-          <input
-            type="file"
-            id="postMedia"
-            name="media"
-            accept="image/png, image/jpeg, image/gif, video/mp4, video/webm, video/ogg, audio/mp3, audio/wav"
-          />
-          <span id="postMediaName" class="file-name-display"></span>
-        </div>
-        <div class="form-group">
-          <label for="postType">Tipo de Post:</label>
-          <select id="postType" name="post_type">
-            <option value="publication" selected>Publicação</option>
-            <option value="event">Evento</option>
-          </select>
-        </div>
-        <button type="submit" class="submit-post-button">Publicar</button>
-      </form>
+    <div class="user-feed-header-tools">
+      <h3>Bem-vindo ao Corsona!</h3>
+      <p>Descubra novas músicas, eventos e artistas.</p>
+      <input type="search" id="userFeedSearch" placeholder="Buscar artistas, músicas, eventos..." class="form-control-feed">
     </div>
-    {% endif %}
 
     <h1 class="feed-title">Publicações Recentes</h1>
     <div id="postsContainer">
@@ -188,11 +159,11 @@ head_css %}
           <h3>Detalhes do Artista</h3>
           <div class="form-group">
             <label>RG</label>
-            <p id="rgDisplay" class="info-display"></p>
+            <p id="rgDisplay" class="info-display">{{ session.rg or 'N/A' }}</p>
           </div>
           <div class="form-group">
             <label>CPF</label>
-            <p id="cpfDisplay" class="info-display"></p>
+            <p id="cpfDisplay" class="info-display">{{ session.cpf or 'N/A' }}</p>
           </div>
           <div class="form-group">
             <label for="instagramLinkInputModal">Link do Instagram</label>
@@ -200,6 +171,7 @@ head_css %}
               type="url"
               id="instagramLinkInputModal"
               name="instagram_link"
+              value="{{ session.instagram_link or '' }}"
             />
           </div>
         </div>
@@ -253,6 +225,8 @@ head_css %}
   </div>
 </div>
 {% endblock %} {% block scripts %}
+<script src="{{ url_for('static', filename='js/apiService.js') }}"></script>
 <script src="{{ url_for('static', filename='js/feed.js') }}"></script>
 <script src="{{ url_for('static', filename='js/profileModal.js') }}"></script>
+<script src="{{ url_for('static', filename='js/feed_user.js') }}"></script>
 {% endblock %}

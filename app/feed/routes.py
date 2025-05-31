@@ -6,7 +6,19 @@ import os
 @feed_bp.route("/")
 @login_required
 def feed_page():
-    return render_template("feed/feed.html")
+    actor_type = session.get("actor_type")
+    if actor_type == "artist":
+        return render_template("feed/feed_artist.html")
+    elif actor_type == "user":
+        return render_template("feed/feed_user.html")
+    else:
+        current_app.logger.warning(f"Página de feed acessada com tipo de ator inválido ou ausente na sessão. ID do Usuário: {session.get('user_id')}, Tipo de Ator: {actor_type}")
+        session.clear()
+        login_url = url_for('auth.login', _external=True)
+        if not request.is_secure and 'https://' in login_url:
+            login_url = login_url.replace('https://', 'http://')
+        return redirect(login_url)
+
 
 @feed_bp.route("/api/user", methods=["GET"])
 @login_required
@@ -30,6 +42,11 @@ def get_current_user_api(cursor):
         user_data_db = cursor.fetchone()
 
     if user_data_db:
+        if actor_type == "artist":
+            session['rg'] = user_data_db.get('rg')
+            session['cpf'] = user_data_db.get('cpf')
+            session['instagram_link'] = user_data_db.get('instagram_link')
+            session.modified = True
         return jsonify({"user": serialize_user(user_data_db, actor_type)}), 200
 
     session.clear()
@@ -111,6 +128,7 @@ def get_posts_api(cursor):
     current_actor_id = session["actor_id"]
     current_actor_type = session["actor_type"]
     filter_type = request.args.get('filter')
+    search_query = request.args.get('query')
 
     base_query = """
         SELECT
@@ -142,6 +160,21 @@ def get_posts_api(cursor):
         where_clauses.append("p.post_type = 'event'")
     elif filter_type == 'media':
         where_clauses.append("p.media_type IN ('image', 'video')")
+
+    if search_query:
+        search_term_like = f"%{search_query}%"
+        search_condition = """
+        (
+            p.content LIKE %s OR
+            (p.actor_type = 'artist' AND (
+                (SELECT art.name FROM artists art WHERE art.id = p.actor_id) LIKE %s OR
+                (SELECT art.username FROM artists art WHERE art.id = p.actor_id) LIKE %s
+            ))
+        )
+        """
+        where_clauses.append(search_condition)
+        params.extend([search_term_like, search_term_like, search_term_like])
+
 
     if where_clauses:
         base_query += " WHERE " + " AND ".join(where_clauses)
@@ -272,4 +305,3 @@ def get_comments_api(cursor, post_id):
         comments_list.append(comment_dict)
 
     return jsonify({"comments": comments_list}), 200
-
