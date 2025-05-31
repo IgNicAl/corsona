@@ -305,3 +305,86 @@ def get_comments_api(cursor, post_id):
         comments_list.append(comment_dict)
 
     return jsonify({"comments": comments_list}), 200
+
+@feed_bp.route("/api/posts/<int:post_id>", methods=["DELETE"])
+@login_required
+@db_handler
+def delete_post_api(cursor, post_id):
+    actor_id = session["actor_id"]
+    actor_type = session["actor_type"]
+
+    cursor.execute("SELECT actor_id, actor_type, media_path FROM posts WHERE id = %s", (post_id,))
+    post_data = cursor.fetchone()
+
+    if not post_data:
+        return jsonify({"message": "Post não encontrado."}), 404
+
+    if post_data["actor_id"] != actor_id or post_data["actor_type"] != actor_type:
+        current_app.logger.warning(f"Tentativa não autorizada de exclusão do post {post_id} pelo actor_id {actor_id} ({actor_type}). Dono do post: {post_data['actor_id']} ({post_data['actor_type']})")
+        return jsonify({"message": "Você não tem permissão para excluir este post."}), 403
+
+    if actor_type != "artist":
+        current_app.logger.warning(f"Tentativa de exclusão do post {post_id} por um não-artista: actor_id {actor_id} ({actor_type}).")
+        return jsonify({"message": "Apenas o artista autor pode excluir o post."}), 403
+
+    old_media_path = post_data.get("media_path")
+
+    cursor.execute("DELETE FROM posts WHERE id = %s", (post_id,))
+
+    if cursor.rowcount > 0:
+        if old_media_path and old_media_path.startswith(f'/{current_app.config["UPLOAD_FOLDER_NAME"]}/'):
+            try:
+                filename_in_uploads = old_media_path.split('/')[-1]
+                media_full_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename_in_uploads)
+                if os.path.exists(media_full_path):
+                    os.remove(media_full_path)
+                    current_app.logger.info(f"Arquivo de mídia {media_full_path} do post {post_id} excluído com sucesso.")
+            except Exception as e:
+                current_app.logger.error(f"Erro ao remover o arquivo de mídia {old_media_path} do post {post_id}: {e}")
+
+        return jsonify({"message": "Post excluído com sucesso!"}), 200
+    else:
+        current_app.logger.warning(f"Post {post_id} não encontrado para exclusão (talvez já excluído).")
+        return jsonify({"message": "Post não encontrado ou já excluído."}), 404
+
+@feed_bp.route("/api/posts/<int:post_id>/comments/<int:comment_id>", methods=["DELETE"])
+@login_required
+@db_handler
+def delete_comment_api(cursor, post_id, comment_id):
+    actor_id_session = session["actor_id"]
+    actor_type_session = session["actor_type"]
+
+    cursor.execute("SELECT actor_id, actor_type FROM comments WHERE id = %s AND post_id = %s", (comment_id, post_id))
+    comment_data = cursor.fetchone()
+
+    if not comment_data:
+        return jsonify({"message": "Comentário não encontrado ou não pertence a este post."}), 404
+
+    cursor.execute("SELECT actor_id, actor_type FROM posts WHERE id = %s", (post_id,))
+    post_data = cursor.fetchone()
+
+    if not post_data:
+        return jsonify({"message": "Post original não encontrado."}), 404
+
+    is_comment_author = (comment_data["actor_id"] == actor_id_session and comment_data["actor_type"] == actor_type_session)
+    is_post_author = (post_data["actor_id"] == actor_id_session and post_data["actor_type"] == actor_type_session)
+
+    if not (is_comment_author or is_post_author):
+        current_app.logger.warning(
+            f"Tentativa não autorizada de exclusão do comentário {comment_id} (post {post_id}) "
+            f"pelo actor_id {actor_id_session} ({actor_type_session}). "
+            f"Dono do comentário: {comment_data['actor_id']} ({comment_data['actor_type']}), "
+            f"Dono do post: {post_data['actor_id']} ({post_data['actor_type']})"
+        )
+        return jsonify({"message": "Você não tem permissão para excluir este comentário."}), 403
+
+    cursor.execute("DELETE FROM comments WHERE id = %s", (comment_id,))
+
+    if cursor.rowcount > 0:
+        cursor.execute("SELECT COUNT(*) as count FROM comments WHERE post_id = %s", (post_id,))
+        comment_count_data = cursor.fetchone()
+        comment_count = comment_count_data['count'] if comment_count_data else 0
+        return jsonify({"message": "Comentário excluído com sucesso!", "comment_count": comment_count}), 200
+    else:
+        current_app.logger.warning(f"Comentário {comment_id} (post {post_id}) não encontrado para exclusão durante a operação DELETE (talvez já excluído).")
+        return jsonify({"message": "Comentário não encontrado ou já excluído."}), 404

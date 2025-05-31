@@ -4,7 +4,26 @@ document.addEventListener('DOMContentLoaded', () => {
     const manageMyPostsButton = document.getElementById('manageMyPostsButton');
     if (manageMyPostsButton) {
         manageMyPostsButton.addEventListener('click', () => {
-            alert("Funcionalidade 'Gerenciar Minhas Publicações' ainda não implementada. Redirecionamento ou modal apareceria aqui.");
+            if(window.currentUserData && window.currentUserData.actor_type === 'artist'){
+              const artistId = window.currentUserData.id;
+              const postsOnPage = document.querySelectorAll('.post');
+              let foundPosts = 0;
+              postsOnPage.forEach(postElement => {
+                if (postElement.dataset.userId && parseInt(postElement.dataset.userId) === artistId) {
+                  postElement.style.border = '2px solid var(--primary-color)';
+                  foundPosts++;
+                } else {
+                  postElement.style.border = '1px solid #dee2e6';
+                }
+              });
+              if (foundPosts > 0) {
+                alert("Suas publicações foram destacadas. Use o menu em cada post para gerenciar.");
+              } else {
+                alert("Você não tem publicações visíveis nessa págia para destacar.");
+              }
+            } else {
+              alert("Funcionalidade disponível apenas para artistas logados.");
+            }
         });
     }
 
