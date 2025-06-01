@@ -19,7 +19,7 @@ body {
 html {
     scroll-behavior: smooth;
 }
-
+/*animação do background*/
 .bgAnimation {
     position: fixed; 
     top: 0;
