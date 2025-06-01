@@ -1,0 +1,35 @@
+.user-feed-header-tools {
+  background-color: var(--secondary-color);
+  padding: 15px;
+  margin-bottom: 20px;
+  border-radius: 6px;
+  border: 1px solid var(--primary-color);
+}
+
+.user-feed-header-tools h3 {
+  margin-top: 0;
+  color: var(--quamtum);
+  font-size: 1.3em;
+}
+
+.user-feed-header-tools p {
+  font-size: 0.95em;
+  color: #333;
+}
+
+.form-control-feed {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  font-size: 0.95em;
+  margin-top: 10px;
+  box-shadow: inset 0 1px 1px rgba(0,0,0,.075);
+  transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+}
+
+.form-control-feed:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(218, 106, 5, 0.1);
+}

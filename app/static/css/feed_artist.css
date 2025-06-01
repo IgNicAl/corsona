@@ -1,0 +1,38 @@
+.artist-feed-header-tools {
+  background-color: #fff8e1;
+  padding: 15px;
+  margin-bottom: 20px;
+  border-radius: 6px;
+  border: 1px solid #ffecb3;
+}
+
+.artist-feed-header-tools h3 {
+  margin-top: 0;
+  color: var(--ochre);
+  font-size: 1.3em;
+}
+
+.artist-feed-header-tools p {
+  font-size: 0.95em;
+  color: #333;
+}
+
+#manageMyPostsButton {
+  background-color: var(--secondary-color);
+  color: var(--beige);
+  border-color: var(--secondary-color);
+  padding: 8px 15px;
+  font-size: 0.9em;
+  font-weight: bold;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+#manageMyPostsButton:hover {
+  background-color: var(--saturated-orange);
+  color: var(--white);
+}
+
+.create-post-section {
+  border-left: 3px solid var(--primary-color);
+  padding-left: 20px;
+}

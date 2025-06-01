@@ -10,7 +10,7 @@ import mysql.connector
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if 'user_id' not in session:
+        if 'user_id' not in session or 'actor_type' not in session:
             if request.accept_mimetypes.accept_json and \
                not request.accept_mimetypes.accept_html:
                 return jsonify(message="Autenticação requerida"), 401
@@ -21,33 +21,34 @@ def login_required(f):
 def db_handler(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        db = None
+        db_conn = None
         cursor = None
         try:
-            db = get_db()
-            cursor = db.cursor(dictionary=True)
+            db_conn = get_db()
+            cursor = db_conn.cursor(dictionary=True)
             result = f(cursor, *args, **kwargs)
-            db.commit()
+            db_conn.commit()
             return result
         except mysql.connector.Error as err:
-            if db:
-                db.rollback()
+            if db_conn:
+                db_conn.rollback()
             current_app.logger.error(f"Database error: {err}")
-            return jsonify({"message": f"Erro no banco de dados: {str(err)}"}), 500
+            return jsonify({"message": "Erro no banco de dados. Tente novamente mais tarde."}), 500
         except Exception as e:
-            if db:
-                db.rollback()
+            if db_conn:
+                db_conn.rollback()
             current_app.logger.error(f"Internal server error: {e}")
-            return jsonify({"message": f"Erro interno no servidor: {str(e)}"}), 500
+            return jsonify({"message": "Erro interno no servidor. Tente novamente mais tarde."}), 500
         finally:
             if cursor:
                 cursor.close()
     return decorated_function
 
-def serialize_user(user_db_row):
+def serialize_user(user_db_row, actor_type):
     if not user_db_row:
         return None
-    return {
+    
+    user_data = {
         "id": user_db_row.get("id"),
         "name": user_db_row.get("name"),
         "email": user_db_row.get("email"),
@@ -56,12 +57,22 @@ def serialize_user(user_db_row):
         "avatar_path": user_db_row.get("avatar_path"),
         "avatar_position": user_db_row.get("avatar_position"),
         "avatar_size": user_db_row.get("avatar_size"),
+        "actor_type": actor_type
     }
 
-def update_session_with_user_data(user_dict):
+    if actor_type == "artist":
+        user_data["rg"] = user_db_row.get("rg")
+        user_data["cpf"] = user_db_row.get("cpf")
+        user_data["instagram_link"] = user_db_row.get("instagram_link")
+            
+    return user_data
+
+def update_session_with_user_data(user_dict, actor_type):
     session.clear()
-    if user_dict:
+    if user_dict and actor_type:
         session["user_id"] = user_dict["id"]
+        session["actor_id"] = user_dict["id"]
+        session["actor_type"] = actor_type
         session["user_name"] = user_dict["name"]
         session["user_email"] = user_dict["email"]
         session["user_username"] = user_dict["username"]
