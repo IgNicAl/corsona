@@ -175,10 +175,10 @@ def _login_user_api(cursor):
     user_data_for_session = serialize_user(user_db_row, actor_type)
     update_session_with_user_data(user_data_for_session, actor_type)
 
-    return jsonify({"message": "Login bem-sucedido!", "user": user_data_for_session}), 200
+    return jsonify({ "user": user_data_for_session}), 200
 
 @auth_bp.route("/logout", methods=["POST"])
 @login_required
 def logout():
-    update_session_with_user_data(None, None) # Limpa a sessão
-    return jsonify({"message": "Logout realizado com sucesso"}), 200
+    update_session_with_user_data(None, None)
+    return jsonify({}), 200

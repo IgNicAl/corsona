@@ -5,6 +5,17 @@ block head_css %}
   href="{{ url_for('static', filename='css/forms.css') }}"
 />
 {% endblock %} {% block content %}
+    <div class="top-bar">
+      <nav>
+        <h1 onclick="window.location.href='/'" style="cursor:pointer;">CORSONA</h1>
+        <ul>
+          <li><a href="{{ url_for('main.index', _anchor='home-section') }}">Início</a></li>
+          <li><a href="{{ url_for('main.index', _anchor='help-section') }}">Ajuda</a></li>
+          <li><a href="{{ url_for('main.index', _anchor='about-section') }}">Sobre</a></li>
+          <li><a href="{{ url_for('auth.login') }}" class="nav-button">Entrar</a></li>
+        </ul>
+      </nav>
+    </div>
 <div class="form-page-container">
   <div class="form-box">
     <h2>Login</h2>

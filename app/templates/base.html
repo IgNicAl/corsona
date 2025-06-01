@@ -12,19 +12,10 @@
     {% block head_css %}{% endblock %}
   </head>
   <body>
-    {# Container para os alertas customizados - REMOVIDO style="display: none;" #}
     <div id="custom-alert-container" class="custom-alert">
       <span id="custom-alert-message"></span>
       <button id="custom-alert-close-btn" class="custom-alert-close">&times;</button>
     </div>
-
-    <header class="logo-container">
-      <img
-        src="{{ url_for('static', filename='images/logos/logo3.svg') }}"
-        alt="Corsona Logo"
-      />
-    </header>
-
     <main class="page-content">
       {% block content %}{% endblock %}
     </main>

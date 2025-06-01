@@ -20,6 +20,18 @@ head_css %}
   referrerpolicy="no-referrer"
 />
 {% endblock %} {% block content %}
+    <div class="top-bar">
+      <nav>
+        <h1 onclick="window.location.href='/'" style="cursor:pointer;">CORSONA</h1>
+        <ul>
+          <!-- <li><a href="/">Início</a></li> -->
+          <input class="search-bar" type="search" id="userFeedSearch" placeholder="Buscar artistas" >
+          <!-- <li><a href="{{ url_for('main.index', _anchor='help-section') }}">Ajuda</a></li> -->
+          <!-- <li><a href="{{ url_for('main.index', _anchor='about-section') }}">Sobre</a></li> -->
+          <li><a id="logoutButton" class="nav-button">Sair</a></li>
+        </ul>
+      </nav>
+    </div>
 <div class="container">
   <aside class="sidebar">
     <div class="profile-header">
@@ -77,15 +89,15 @@ head_css %}
         </div>
       </div>
     </div>
-    <button id="logoutButton" class="logout-button">Sair</button>
+    <!-- <button id="logoutButton" class="logout-button">Sair</button> -->
   </aside>
 
   <main class="main-content">
-    <div class="user-feed-header-tools">
+    <!-- <div class="user-feed-header-tools">
       <h3>Bem-vindo ao Corsona!</h3>
       <p>Descubra novas músicas, eventos e artistas.</p>
       <input class="form-control-feed" type="search" id="userFeedSearch" placeholder="Buscar artistas" >
-    </div>
+    </div> -->
 
     <h1 class="feed-title">Publicações Recentes</h1>
     <div id="postsContainer">
