@@ -216,7 +216,7 @@ def toggle_like_post_api(cursor, post_id):
     cursor.execute("SELECT COUNT(*) as count FROM likes WHERE post_id = %s", (post_id,))
     like_count = cursor.fetchone()['count']
 
-    return jsonify({"message": "Sucesso", "liked": liked, "like_count": like_count}), 200
+    return jsonify({"liked": liked, "like_count": like_count}), 200
 
 @feed_bp.route("/api/posts/<int:post_id>/comments", methods=["POST"])
 @login_required
@@ -266,7 +266,7 @@ def add_comment_api(cursor, post_id):
     cursor.execute("SELECT COUNT(*) as count FROM comments WHERE post_id = %s", (post_id,))
     comment_count = cursor.fetchone()['count']
 
-    return jsonify({"message": "Comentário adicionado!", "comment": new_comment, "comment_count": comment_count}), 201
+    return jsonify({ "comment": new_comment, "comment_count": comment_count}), 201
 
 @feed_bp.route("/api/posts/<int:post_id>/comments", methods=["GET"])
 @login_required

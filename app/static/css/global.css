@@ -186,3 +186,62 @@ button {
   cursor: pointer;
   font-family: inherit;
 }
+
+.custom-alert {
+  position: fixed;
+  top: -100px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 15px 25px;
+  color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  z-index: 2000;
+  align-items: center;
+  opacity: 0;
+  display: none;
+  transition: opacity 0.3s ease, top 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+  min-width: 300px;
+  max-width: 90%;
+  justify-content: space-between;
+}
+
+.custom-alert.show {
+  opacity: 1;
+  display: flex;
+  top: 20px;
+}
+
+.custom-alert.success {
+  background-color: #5cb85c;
+}
+
+.custom-alert.error {
+  background-color: #d9534f;
+}
+
+.custom-alert.info {
+  background-color: #5bc0de;
+}
+
+#custom-alert-message {
+  flex-grow: 1;
+  text-align: left;
+  padding-right: 10px;
+}
+
+.custom-alert-close {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 22px;
+  font-weight: bold;
+  margin-left: 15px;
+  cursor: pointer;
+  padding: 0 5px;
+  line-height: 1;
+}
+
+.custom-alert-close:hover {
+  opacity: 0.8;
+}

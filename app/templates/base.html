@@ -12,6 +12,12 @@
     {% block head_css %}{% endblock %}
   </head>
   <body>
+    {# Container para os alertas customizados - REMOVIDO style="display: none;" #}
+    <div id="custom-alert-container" class="custom-alert">
+      <span id="custom-alert-message"></span>
+      <button id="custom-alert-close-btn" class="custom-alert-close">&times;</button>
+    </div>
+
     <header class="logo-container">
       <img
         src="{{ url_for('static', filename='images/logos/logo3.svg') }}"
@@ -23,6 +29,7 @@
       {% block content %}{% endblock %}
     </main>
 
+    <script src="{{ url_for('static', filename='js/notifications.js') }}"></script>
     <script src="{{ url_for('static', filename='js/apiService.js') }}"></script>
     {% block scripts %}{% endblock %}
   </body>
