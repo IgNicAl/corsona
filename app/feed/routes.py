@@ -165,15 +165,14 @@ def get_posts_api(cursor):
         search_term_like = f"%{search_query}%"
         search_condition = """
         (
-            p.content LIKE %s OR
-            (p.actor_type = 'artist' AND (
+            p.actor_type = 'artist' AND (
                 (SELECT art.name FROM artists art WHERE art.id = p.actor_id) LIKE %s OR
                 (SELECT art.username FROM artists art WHERE art.id = p.actor_id) LIKE %s
-            ))
+            )
         )
         """
         where_clauses.append(search_condition)
-        params.extend([search_term_like, search_term_like, search_term_like])
+        params.extend([search_term_like, search_term_like])
 
 
     if where_clauses:
