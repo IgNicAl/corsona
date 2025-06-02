@@ -166,3 +166,4 @@ A aplicação estará rodando em `http://127.0.0.1:5000/` (ou no endereço IP da
 - **Problemas com Sessão (ex: `TypeError: cannot use a string pattern on a bytes-like object`)**: Verifique se a versão da `Flask-Session` no `requirements.txt` é `>=0.6.0`. Se não, atualize e reinstale as dependências.
 
 Este `README.md` deve cobrir os pontos essenciais. Você pode adicionar mais seções conforme necessário, como "Contribuição", "Licença", ou detalhes mais aprofundados sobre a arquitetura.
+
