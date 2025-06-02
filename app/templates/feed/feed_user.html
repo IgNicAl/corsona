@@ -23,9 +23,9 @@ head_css %}
     <div class="top-bar">
       <nav>
         <h1 onclick="window.location.href='/'" style="cursor:pointer;">CORSONA</h1>
+        <input class="search-bar" type="search" id="userFeedSearch" placeholder="Buscar artista" >
         <ul>
           <!-- <li><a href="/">Início</a></li> -->
-          <input class="search-bar" type="search" id="userFeedSearch" placeholder="Buscar artistas" >
           <!-- <li><a href="{{ url_for('main.index', _anchor='help-section') }}">Ajuda</a></li> -->
           <!-- <li><a href="{{ url_for('main.index', _anchor='about-section') }}">Sobre</a></li> -->
           <li><a id="logoutButton" class="nav-button">Sair</a></li>
@@ -132,7 +132,7 @@ head_css %}
               accept="image/png, image/jpeg, image/gif"
               style="display: none"
             />
-            <button type="button" id="chooseAvatarButton" class="modal-button">
+            <button type="button" id="chooseAvatarButton" class="modal-button primary">
               Escolher imagem
             </button>
           </div>
@@ -220,7 +220,7 @@ head_css %}
               autocomplete="new-password"
             />
           </div>
-          <button type="button" id="changePasswordButton" class="modal-button">
+          <button type="button" id="changePasswordButton" class="modal-button primary">
             Atualizar Senha
           </button>
         </form>

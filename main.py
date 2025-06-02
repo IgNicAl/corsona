@@ -22,4 +22,4 @@ if __name__ == '__main__':
         print("Verifique seu arquivo .env e se ele está sendo carregado corretamente.")
         sys.exit(1)
 
-    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5001  )))
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000  )))

@@ -12,6 +12,9 @@
     {% block head_css %}{% endblock %}
   </head>
   <body>
+    <div class="bgAnimation" id="bgAnimation">
+      <div class="backgroundAmim"></div>
+    </div>
     <div id="custom-alert-container" class="custom-alert">
       <span id="custom-alert-message"></span>
       <button id="custom-alert-close-btn" class="custom-alert-close">&times;</button>
@@ -22,6 +25,7 @@
 
     <script src="{{ url_for('static', filename='js/notifications.js') }}"></script>
     <script src="{{ url_for('static', filename='js/apiService.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/homescript.js') }}"></script>
     {% block scripts %}{% endblock %}
   </body>
 </html>
