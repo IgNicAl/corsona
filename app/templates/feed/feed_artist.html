@@ -20,6 +20,19 @@ block head_css %}
   referrerpolicy="no-referrer"
 />
 {% endblock %} {% block content %}
+    <div class="top-bar">
+      <nav>
+        <h1 onclick="window.location.href='/'" style="cursor:pointer;">CORSONA</h1>
+        <input class="search-bar" type="search" id="userFeedSearch" placeholder="Buscar artistas" >
+        <ul>
+          <button id="manageMyPostsButton" class="nav-button" style="border-radius: 5px;">Gerenciar Minhas Publicações</button>
+          <!-- <li><a href="/">Início</a></li> -->
+          <!-- <li><a href="{{ url_for('main.index', _anchor='help-section') }}">Ajuda</a></li>
+          <li><a href="{{ url_for('main.index', _anchor='about-section') }}">Sobre</a></li> -->
+          <li><a id="logoutButton" class="nav-button">Sair</a></li>
+        </ul>
+      </nav>
+    </div>
 <div class="container">
  <aside class="sidebar">
     <div class="profile-header">
@@ -81,15 +94,13 @@ block head_css %}
         </div>
       </div>
     </div>
-    <button id="logoutButton" class="logout-button">Sair</button>
   </aside>
 
   <main class="main-content">
-    <div class="artist-feed-header-tools">
+    <!-- <div class="artist-feed-header-tools">
       <h3>Painel do Artista</h3>
       <p>Gerencie suas publicações e veja seu alcance.</p>
-      <button id="manageMyPostsButton" class="profile-edit-button" style="margin-top:10px;">Gerenciar Minhas Publicações</button>
-    </div>
+    </div> -->
 
     <div class="create-post-section">
       <h3>Criar Nova Publicação</h3>
@@ -157,7 +168,7 @@ block head_css %}
               accept="image/png, image/jpeg, image/gif"
               style="display: none"
             />
-            <button type="button" id="chooseAvatarButton" class="modal-button">
+            <button type="button" id="chooseAvatarButton" class="modal-button primary">
               Escolher imagem
             </button>
           </div>
@@ -206,6 +217,7 @@ block head_css %}
             <label for="instagramLinkInputModal">Link do Instagram</label>
             <input
               type="url"
+              class="info-display"
               id="instagramLinkInputModal"
               name="instagram_link"
               value="{{ session.instagram_link or '' }}"
@@ -245,7 +257,7 @@ block head_css %}
               autocomplete="new-password"
             />
           </div>
-          <button type="button" id="changePasswordButton" class="modal-button">
+          <button type="button" id="changePasswordButton" class="modal-button primary">
             Atualizar Senha
           </button>
         </form>
@@ -266,4 +278,5 @@ block head_css %}
 <script src="{{ url_for('static', filename='js/feed.js') }}"></script>
 <script src="{{ url_for('static', filename='js/profileModal.js') }}"></script>
 <script src="{{ url_for('static', filename='js/feed_artist.js') }}"></script>
+<script src="{{ url_for('static', filename='js/feed_user.js') }}"></script>
 {% endblock %}

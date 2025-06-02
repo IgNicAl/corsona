@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const password = passwordInput.value;
 
             if (!identifier || !password) {
-                alert('Por favor, preencha o e-mail ou nome de usuário e a senha.');
+                showCustomAlert('Por favor, preencha o e-mail ou nome de usuário e a senha.', 'error');
                 return;
             }
 
@@ -18,10 +18,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 const data = await apiRequest('/login', 'POST', { identifier, password });
                 if (data.user) {
                     window.location.href = '/feed/';
-                } else {
-                    alert(data.message || 'Erro ao fazer login. Verifique suas credenciais.');
                 }
             } catch (error) {
+                console.error("Erro no login:", error);
             }
         });
     }
@@ -78,24 +77,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const nameRegex = /^[A-Za-zÀ-ú\s]+$/;
             if (!nameRegex.test(name)) {
-                alert('O nome deve conter apenas letras e espaços.');
+                showCustomAlert('O nome deve conter apenas letras e espaços.', 'error');
                 return;
             }
             if (username.includes(' ')) {
-                alert('O nome de usuário não pode conter espaços.');
+                showCustomAlert('O nome de usuário não pode conter espaços.', 'error');
                 return;
             }
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!emailRegex.test(email)) {
-                alert('Por favor, insira um endereço de e-mail válido.');
+                showCustomAlert('Por favor, insira um endereço de e-mail válido.', 'error');
                 return;
             }
             if (password.length < 8) {
-                alert('A senha deve ter pelo menos 8 caracteres.');
+                showCustomAlert('A senha deve ter pelo menos 8 caracteres.', 'error');
                 return;
             }
             if (password !== confirmPassword) {
-                alert('As senhas não coincidem!');
+                showCustomAlert('As senhas não coincidem!', 'error');
                 return;
             }
 
@@ -113,13 +112,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 const instagram_link = instagramInput.value.trim();
 
                 if (!rg) {
-                    alert('RG é obrigatório para artistas.'); return;
+                    showCustomAlert('RG é obrigatório para artistas.', 'error'); return;
                 }
                 if (!cpf) {
-                    alert('CPF é obrigatório para artistas.'); return;
+                    showCustomAlert('CPF é obrigatório para artistas.', 'error'); return;
                 }
                 if (!instagram_link) {
-                    alert('Link do Instagram é obrigatório para artistas.'); return;
+                    showCustomAlert('Link do Instagram é obrigatório para artistas.', 'error'); return;
                 }
 
                 registrationData.rg = rg;
@@ -129,11 +128,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
             try {
                 const data = await apiRequest('/register', 'POST', registrationData);
-                alert(data.message || 'Cadastro realizado com sucesso!');
                 if (data.message && data.message.toLowerCase().includes('sucesso')) {
                     window.location.href = '/login';
                 }
             } catch (error) {
+                console.error("Erro no cadastro:", error);
             }
         });
     }

@@ -12,18 +12,20 @@
     {% block head_css %}{% endblock %}
   </head>
   <body>
-    <header class="logo-container">
-      <img
-        src="{{ url_for('static', filename='images/logos/logo3.svg') }}"
-        alt="Corsona Logo"
-      />
-    </header>
-
+    <div class="bgAnimation" id="bgAnimation">
+      <div class="backgroundAmim"></div>
+    </div>
+    <div id="custom-alert-container" class="custom-alert">
+      <span id="custom-alert-message"></span>
+      <button id="custom-alert-close-btn" class="custom-alert-close">&times;</button>
+    </div>
     <main class="page-content">
       {% block content %}{% endblock %}
     </main>
 
+    <script src="{{ url_for('static', filename='js/notifications.js') }}"></script>
     <script src="{{ url_for('static', filename='js/apiService.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/homescript.js') }}"></script>
     {% block scripts %}{% endblock %}
   </body>
 </html>

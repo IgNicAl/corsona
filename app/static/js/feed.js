@@ -230,7 +230,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const postElement = document.querySelector(`.post[data-post-id="${currentPostId}"]`);
                     if (postElement) {
                         postElement.remove();
-                        alert("Post excluído com sucesso.");
                         if (window.currentUserData && parseInt(postElement.dataset.userId) === window.currentUserData.id && userPostCountElement) {
                              const currentCount = parseInt(userPostCountElement.textContent || "0");
                              if (currentCount > 0) userPostCountElement.textContent = currentCount - 1;
@@ -251,7 +250,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const commentElement = document.querySelector(`.comment[data-comment-id="${commentId}"]`);
                     if (commentElement) {
                         commentElement.remove();
-                        alert("Comentário excluído com sucesso.");
                     }
                     const postElement = document.querySelector(`.post[data-post-id="${parentPostId}"]`);
                     if (postElement) {
@@ -312,9 +310,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             const postUrl = `${window.location.origin}/feed#post-${postId}`;
             try {
                 await navigator.clipboard.writeText(`Confira este post: ${postUrl}`);
-                alert("Link do post copiado para a área de transferência!");
+                showCustomAlert("Link do post copiado para a área de transferência!", 'success');
             } catch (err) {
-                alert("Não foi possível copiar o link. Você pode copiar manualmente: " + postUrl);
+                showCustomAlert("Não foi possível copiar o link. Você pode copiar manualmente: " + postUrl, 'info');
             }
         }
     };
@@ -327,7 +325,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const content = commentInput.value.trim();
 
         if (!content) {
-            alert("O comentário não pode estar vazio.");
+            showCustomAlert("O comentário não pode estar vazio.", 'error');
             return;
         }
 
@@ -430,7 +428,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const postType = postTypeInput.value;
 
             if (!content && !mediaFile) {
-                alert("A publicação deve ter conteúdo ou uma mídia.");
+                showCustomAlert("A publicação deve ter conteúdo ou uma mídia.", 'error');
                 return;
             }
 
@@ -454,6 +452,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     }
                 }
             } catch (error) {
+                console.error("Erro ao criar post:", error);
             }
         });
 
@@ -525,6 +524,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 window.currentUserData = null;
                 window.location.href = '/';
             } catch (error) {
+                console.error("Erro ao fazer logout:", error)
             }
         });
     }

@@ -17,12 +17,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
               });
               if (foundPosts > 0) {
-                alert("Suas publicações foram destacadas. Use o menu em cada post para gerenciar.");
+                showCustomAlert("Suas publicações foram destacadas. Use o menu em cada post para gerenciar.", 'info');
               } else {
-                alert("Você não tem publicações visíveis nessa págia para destacar.");
+                showCustomAlert("Você não tem publicações visíveis nessa págia para destacar.", 'info');
               }
             } else {
-              alert("Funcionalidade disponível apenas para artistas logados.");
+              showCustomAlert("Funcionalidade disponível apenas para artistas logados.", 'error');
             }
         });
     }
