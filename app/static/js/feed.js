@@ -5,11 +5,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     const profileUsername = document.getElementById('userUsername');
     const userPostCountElement = document.getElementById('userPostCount');
 
-    const createPostForm = document.getElementById('createPostForm');
+    const createPostForm = document.getElementById('createPost');
     const postContentInput = document.getElementById('postContent');
     const postMediaInput = document.getElementById('postMedia');
     const postMediaNameDisplay = document.getElementById('postMediaName');
     const postTypeInput = document.getElementById('postType');
+
+    const postModal = document.getElementById('postModal');
+    const postModalTitle = postModal ? postModal.querySelector('.modal-header h2') : null;
+    const postModalSubmitButton = postModal ? postModal.querySelector('button[type="submit"]') : null;
 
     const postsContainer = document.getElementById('postsContainer');
     const postPlaceholder = document.getElementById('postPlaceholder');
@@ -23,15 +27,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const updateProfileUI = (user) => {
         if (!profileName || !profileUsername || !bioDisplay || !sidebarProfileAvatar) {
-            console.error("Elementos da UI do perfil não encontrados no DOM.");
             return;
         }
-
         if (user) {
             profileName.textContent = user.name || 'Nome Completo';
             profileUsername.textContent = '@' + (user.username || 'username');
             bioDisplay.textContent = user.bio || 'Aqui vai uma breve descrição do usuário.';
-
             if (user.avatar_path) {
                 sidebarProfileAvatar.style.backgroundImage = `url('${user.avatar_path}')`;
                 if (user.avatar_position) sidebarProfileAvatar.style.backgroundPosition = user.avatar_position;
@@ -46,8 +47,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             } else if (postContentInput) {
                  postContentInput.placeholder = `No que você está pensando?`;
             }
-
-
         } else {
             profileName.textContent = 'Carregando...';
             profileUsername.textContent = '@carregando';
@@ -216,7 +215,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 commentsListDiv.innerHTML = '<p class="no-comments">Nenhum comentário ainda.</p>';
             }
         } catch (error) {
-            console.error(`Erro ao carregar comentários para o post ${postId}:`, error);
             commentsListDiv.innerHTML = '<p class="no-comments">Erro ao carregar comentários.</p>';
         }
     };
@@ -242,7 +240,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                         }
                     }
                 } catch (error) {
-                    console.error("Erro ao excluir post:", error);
                 }
             }
         } else if (target.classList.contains('delete-comment-button')) {
@@ -265,7 +262,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                         }
                     }
                 } catch (error) {
-                    console.error("Erro ao excluir comentário:", error);
                 }
             }
         } else if (target.classList.contains('like-button')) {
@@ -293,7 +289,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                     likeCountDisplay.textContent = `${response.like_count || 0} curtida${response.like_count !== 1 ? 's' : ''}`;
                 }
             } catch (error) {
-                console.error("Erro ao curtir:", error);
             }
         } else if (target.classList.contains('comment-button')) {
             if (!postId) return;
@@ -358,7 +353,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             }
         } catch (error) {
-            console.error("Erro ao adicionar comentário:", error);
         }
     };
 
@@ -400,7 +394,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                         userPostCountElement.textContent = userPosts.length;
                     }
                 }
-
             } else {
                 postsContainer.appendChild(postPlaceholder);
                 postPlaceholder.style.display = 'block';
@@ -413,7 +406,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             }
         } catch (error) {
-            console.error("Erro ao carregar posts:", error);
             postsContainer.innerHTML = '';
             postsContainer.appendChild(postPlaceholder);
             postPlaceholder.style.display = 'block';
@@ -425,15 +417,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         createPostForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             if (!postContentInput || !postTypeInput) {
-                console.error("Elementos do formulário de criação de post não encontrados para submissão.");
                 return;
             }
+
+            const isEditMode = createPostForm.dataset.editMode === 'true';
+            const postIdToEdit = createPostForm.dataset.postId;
 
             const content = postContentInput.value.trim();
             const mediaFile = postMediaInput ? postMediaInput.files[0] : null;
             const postType = postTypeInput.value;
 
-            if (!content && !mediaFile) {
+            if (!isEditMode && !content && !mediaFile) {
                 showCustomAlert("A publicação deve ter conteúdo ou uma mídia.", 'error');
                 return;
             }
@@ -446,25 +440,33 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             try {
-                const result = await apiRequest('/feed/api/posts', 'POST', formData, true);
+                let result;
+                if (isEditMode && postIdToEdit) {
+                    result = await apiRequest(`/feed/api/posts/${postIdToEdit}`, 'PUT', formData, true);
+                } else {
+                    result = await apiRequest('/feed/api/posts', 'POST', formData, true);
+                }
+
                 if (result.post) {
                     await loadPosts(currentFilter);
                     createPostForm.reset();
                     if (postMediaNameDisplay) postMediaNameDisplay.textContent = '';
 
-                    const activePostModal = document.getElementById('postModal');
-                    if (activePostModal && activePostModal.style.display === 'flex') {
-                         activePostModal.style.display = 'none';
+                    if (postModal) {
+                        postModal.style.display = 'none';
+                        createPostForm.removeAttribute('data-edit-mode');
+                        createPostForm.removeAttribute('data-post-id');
+                        if(postModalTitle) postModalTitle.textContent = 'Nova Publicação';
+                        if(postModalSubmitButton) postModalSubmitButton.textContent = 'Publicar';
                     }
 
-                    if (currentFilter === 'all' && userPostCountElement && window.currentUserData && result.post.user_id === window.currentUserData.id) {
+                    if (!isEditMode && currentFilter === 'all' && userPostCountElement && window.currentUserData && result.post.user_id === window.currentUserData.id) {
                         if (window.currentUserData.actor_type === 'artist') {
                              userPostCountElement.textContent = parseInt(userPostCountElement.textContent || "0") + 1;
                         }
                     }
                 }
             } catch (error) {
-                console.error("Erro ao criar post:", error);
             }
         });
 
@@ -488,7 +490,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 highlightItem.classList.add('active-filter');
                 const userFeedSearchInput = document.getElementById('userFeedSearch');
                 let searchTerm = null;
-                if (userFeedSearchInput && userFeedSearchInput.value.trim() !== '') {
+                if(userFeedSearchInput && userFeedSearchInput.value.trim() !== ''){
                     searchTerm = userFeedSearchInput.value.trim();
                 }
                 loadPosts(currentFilter, searchTerm);
@@ -497,7 +499,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     const userFeedSearchInput = document.getElementById('userFeedSearch');
-    if (userFeedSearchInput) {
+    if(userFeedSearchInput) {
         userFeedSearchInput.addEventListener('keypress', function(event) {
             if (event.key === 'Enter') {
                 event.preventDefault();
@@ -507,9 +509,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
         userFeedSearchInput.addEventListener('input', function() {
             if (userFeedSearchInput.value.trim() === "") {
-                loadPosts(currentFilter, null);
+                 loadPosts(currentFilter, null);
             }
-        });
+        })
     }
 
     try {
@@ -538,7 +540,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 window.currentUserData = null;
                 window.location.href = '/';
             } catch (error) {
-                console.error("Erro ao fazer logout:", error)
             }
         });
     }

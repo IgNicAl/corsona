@@ -19,6 +19,41 @@ block head_css %}
   crossorigin="anonymous"
   referrerpolicy="no-referrer"
 />
+<style>
+  .post-in-modal {
+    border: 1px solid #444;
+    background-color: rgba(0,0,0,0.3);
+    margin-bottom: 15px;
+    padding: 10px;
+    border-radius: 5px;
+  }
+  .post-manage-actions-modal {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #555;
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+  }
+  .post-manage-actions-modal .button {
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: var(--white);
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9em;
+  }
+  .post-manage-actions-modal .button:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+  }
+  .post-manage-actions-modal .button .fas {
+    margin-right: 5px;
+  }
+  .modal-dialog.modal-lg {
+    max-width: 800px; /* Modal maior para comportar posts */
+  }
+</style>
 {% endblock %} {% block content %}
     <div class="top-bar">
       <nav>
@@ -91,7 +126,7 @@ block head_css %}
               </div>
             </div>
           </div>
-          <button id="managePosts" class="nav-button" style="border-radius: 5px;">Gerenciar Minhas Publicações</button>
+          <button id="managePostsButton" class="nav-button" style="border-radius: 5px;">Gerenciar Minhas Publicações</button>
         </aside>
 
         <main class="main-content">
@@ -242,7 +277,7 @@ block head_css %}
       <button id="closePostModalButton" class="close-modal-button" aria-label="Fechar modal">×</button>
     </div>
     <div class="modal-body">
-      <form id="createPostForm">
+      <form id="createPost">
         <div class="form-group">
           <label for="postType">Tipo de Post:</label>
           <select id="postType" name="post_type">
@@ -274,7 +309,24 @@ block head_css %}
     </div>
     <div class="modal-footer">
       <button type="button" id="cancelPostModalButton" class="modal-button">Cancelar</button>
-      <button type="submit" form="createPostForm" class="modal-button primary">Publicar</button>
+      <button type="submit" form="createPost" class="modal-button primary">Publicar</button>
+    </div>
+  </div>
+</div>
+
+<div id="manageMyPostsModal" class="modal" style="display: none;">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-header">
+      <h2>Gerenciar Minhas Publicações</h2>
+      <button id="closeManageMyPostsModalButton" class="close-modal-button" aria-label="Fechar modal">×</button>
+    </div>
+    <div class="modal-body" id="myPostsModalBodyContainer">
+      <div class="post-placeholder" id="myPostsModalPlaceholder" style="display: none;">
+        <p>Você ainda não fez nenhuma publicação ou nenhuma foi encontrada.</p>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" id="cancelManageMyPostsModalButton" class="modal-button">Fechar</button>
     </div>
   </div>
 </div>
