@@ -1,93 +1,47 @@
-.form-page-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-  padding: 10px;
-  flex-grow: 1;
-  justify-content: center;
+.artist-feed-header-tools {
+  background-color: #fff8e1;
+  padding: 15px;
+  margin-bottom: 20px;
+  border-radius: 6px;
+  border: 1px solid #ffecb3;
 }
 
-.form-box {
+.artist-feed-header-tools h3 {
+  margin-top: 0;
+  color: var(--ochre);
+  font-size: 1.3em;
+}
+
+.artist-feed-header-tools p {
+  font-size: 0.95em;
+  color: #333;
+}
+
+#manageMyPostsButton {
+  background-color: var(--secondary-color);
+  color: var(--beige);
+  border-color: var(--secondary-color);
+  padding: 8px 15px;
+  font-size: 0.9em;
+  font-weight: bold;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+#manageMyPostsButton:hover {
+  background-color: var(--saturated-orange);
+  color: var(--white);
+}
+
+.create-post-section {
   background-color: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(5px);
-  padding: 25px 30px;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  width: 100%;
-  max-width: 380px;
+  border-left: 3px solid var(--primary-color);
+  padding-left: 20px;
 }
 
-.form-box h2 {
-  text-align: center;
-  margin-top: 0;
-  margin-bottom: 25px;
+.create-post-section h3 {
   color: var(--primary-color);
-  font-size: 1.8em;
-}
-
-.form-box .form-group {
-  margin-bottom: 18px;
-}
-
-.form-box input[type="text"],
-.form-box input[type="email"],
-.form-box input[type="password"],
-.form-box input[type="url"] {
-  width: 100%;
-  padding: 12px 15px;
-  border: 1px solid var(--matte-gray);
-  border-radius: 5px;
-  font-size: 1em;
-  background-color: var(--white);
-  color: var(--quantum);
-}
-
-.form-box input[type="text"]:focus,
-.form-box input[type="email"]:focus,
-.form-box input[type="password"]:focus {
-  outline: none;
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 2px rgba(218, 106, 5, 0.2);
-}
-
-.form-box button[type="submit"] {
-  width: 100%;
-  padding: 12px;
-  background-color: var(--primary-color);
-  color: var(--beige);
-  border: none;
-  border-radius: 5px;
-  font-size: 1.1em;
-  font-weight: bold;
-  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
-}
-
-.form-box button[type="submit"]:hover {
-  background-color: var(--secondary-color);
-  color: var(--quantum);
-}
-
-.form-box .form-link-container {
-  text-align: center;
-  margin-top: 20px;
-  font-size: 0.95em;
-}
-
-.form-box .form-link-container a {
-  color: var(--primary-color);
-  font-weight: bold;
-}
-
-.form-select {
-  width: 100%;
-  padding: 12px 15px;
-  border: 1px solid var(--matte-gray);
-  border-radius: 5px;
-  font-size: 1em;
-  background-color: var(--white);
-  color: var(--quantum);
 }
 
 .top-bar {
@@ -191,4 +145,23 @@
     margin-top: 0;
     border-radius: 0;
 }
+.search-bar {
+  width: 30%;
+  padding: 5px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 0.95em;
+  color: var(--white);
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(5px);
+}
 
+.search-bar::placeholder {
+  color: var(--white);
+}
+.search-bar:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(218, 106, 5, 0.1);
+}

@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const postMediaInput = document.getElementById('postMedia');
     const postMediaNameDisplay = document.getElementById('postMediaName');
     const postTypeInput = document.getElementById('postType');
+
     const postsContainer = document.getElementById('postsContainer');
     const postPlaceholder = document.getElementById('postPlaceholder');
     const highlightsContainer = document.querySelector('.highlights-container');
@@ -40,9 +41,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 sidebarProfileAvatar.style.backgroundPosition = 'center';
                 sidebarProfileAvatar.style.backgroundSize = 'cover';
             }
-            if (postContentInput) {
-                postContentInput.placeholder = `No que você está pensando, ${user.name || 'Artista'}?`;
-            }
+
         } else {
             profileName.textContent = 'Carregando...';
             profileUsername.textContent = '@carregando';
@@ -103,7 +102,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         postDiv.dataset.postId = post.id;
         postDiv.dataset.postType = post.post_type;
         postDiv.dataset.mediaType = post.media_type || 'none';
-
+        postDiv.dataset.userId = post.user_id;
 
         const defaultUserAvatar = '/static/images/logos/avatar-default.svg';
         const userAvatar = post.user_avatar_path || defaultUserAvatar;
@@ -113,6 +112,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         const likedClass = post.liked_by_current_user ? 'liked' : '';
         const likeIconClass = post.liked_by_current_user ? 'fas' : 'far';
 
+        let postManagementHTML = '';
+        if (currentUser && currentUser.actor_type === 'artist' && currentUser.id === post.user_id) {
+            postManagementHTML = `
+                <div class="post-manage-actions">
+                    <button class="delete-post-button" data-post-id="${post.id}" title="Excluir Post">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </div>
+            `;
+        }
+
         postDiv.innerHTML = `
             <div class="post-header">
                 <div class="avatar"><img src="${userAvatar}" alt="Avatar de ${post.user_name || post.username}" loading="lazy"></div>
@@ -120,6 +130,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <h3 class="artist-name">${post.user_name || post.username}</h3>
                     <p class="time-ago" title="${new Date(post.created_at).toLocaleString()}">${formatTimeAgo(post.created_at)}</p>
                 </div>
+                ${postManagementHTML}
                 <div class="post-type-indicator">${postTypeIconHTML}</div>
             </div>
             <div class="post-content">
@@ -152,11 +163,26 @@ document.addEventListener('DOMContentLoaded', async () => {
         return postDiv;
     };
 
-    const renderComment = (comment) => {
+    const renderComment = (comment, parentPost) => {
         const commentDiv = document.createElement('div');
         commentDiv.classList.add('comment');
+        commentDiv.dataset.commentId = comment.id;
         const defaultUserAvatar = '/static/images/logos/avatar-default.svg';
         const userAvatar = comment.user_avatar_path || defaultUserAvatar;
+
+        let deleteButtonHTML = '';
+        if (window.currentUserData && parentPost) {
+            const isCommentOwner = window.currentUserData.id === comment.user_id && window.currentUserData.actor_type === comment.actor_type;
+            const isArtistOwningPost = window.currentUserData.actor_type === 'artist' && window.currentUserData.id === parentPost.user_id;
+
+            if (isCommentOwner || isArtistOwningPost) {
+                deleteButtonHTML = `
+                    <button class="delete-comment-button" data-post-id="${parentPost.id}" data-comment-id="${comment.id}" title="Excluir Comentário">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+            }
+        }
 
         commentDiv.innerHTML = `
             <div class="comment-author-avatar">
@@ -164,6 +190,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             </div>
             <div class="comment-content">
                 <span class="comment-author-name">${comment.user_name || comment.username}</span>
+                ${deleteButtonHTML}
                 <p class="comment-text">${comment.content.replace(/\n/g, '<br>')}</p>
                 <span class="comment-time">${formatTimeAgo(comment.created_at)}</span>
             </div>
@@ -171,13 +198,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         return commentDiv;
     };
 
-    const loadAndDisplayComments = async (postId, commentsListDiv) => {
+    const loadAndDisplayComments = async (postId, commentsListDiv, parentPost) => {
         try {
             const data = await apiRequest(`/feed/api/posts/${postId}/comments`, 'GET');
             commentsListDiv.innerHTML = '';
             if (data.comments && data.comments.length > 0) {
                 data.comments.forEach(comment => {
-                    commentsListDiv.appendChild(renderComment(comment));
+                    commentsListDiv.appendChild(renderComment(comment, parentPost));
                 });
             } else {
                 commentsListDiv.innerHTML = '<p class="no-comments">Nenhum comentário ainda.</p>';
@@ -193,9 +220,50 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!target) return;
 
         const postId = target.dataset.postId;
-        if (!postId) return;
 
-        if (target.classList.contains('like-button')) {
+        if (target.classList.contains('delete-post-button')) {
+            const currentPostId = target.dataset.postId;
+            if (!currentPostId) return;
+            if (confirm("Tem certeza que deseja excluir este post? Esta ação não pode ser desfeita.")) {
+                try {
+                    await apiRequest(`/feed/api/posts/${currentPostId}`, 'DELETE');
+                    const postElement = document.querySelector(`.post[data-post-id="${currentPostId}"]`);
+                    if (postElement) {
+                        postElement.remove();
+                        if (window.currentUserData && parseInt(postElement.dataset.userId) === window.currentUserData.id && userPostCountElement) {
+                             const currentCount = parseInt(userPostCountElement.textContent || "0");
+                             if (currentCount > 0) userPostCountElement.textContent = currentCount - 1;
+                        }
+                    }
+                } catch (error) {
+                    console.error("Erro ao excluir post:", error);
+                }
+            }
+        } else if (target.classList.contains('delete-comment-button')) {
+            const commentId = target.dataset.commentId;
+            const parentPostId = target.dataset.postId;
+            if (!commentId || !parentPostId) return;
+
+            if (confirm("Tem certeza que deseja excluir este comentário?")) {
+                try {
+                    const response = await apiRequest(`/feed/api/posts/${parentPostId}/comments/${commentId}`, 'DELETE');
+                    const commentElement = document.querySelector(`.comment[data-comment-id="${commentId}"]`);
+                    if (commentElement) {
+                        commentElement.remove();
+                    }
+                    const postElement = document.querySelector(`.post[data-post-id="${parentPostId}"]`);
+                    if (postElement) {
+                        const commentCountDisplay = postElement.querySelector('.comment-count-display');
+                        if (commentCountDisplay && response.comment_count !== undefined) {
+                            commentCountDisplay.textContent = `${response.comment_count || 0} comentário${response.comment_count !== 1 ? 's' : ''}`;
+                        }
+                    }
+                } catch (error) {
+                    console.error("Erro ao excluir comentário:", error);
+                }
+            }
+        } else if (target.classList.contains('like-button')) {
+            if (!postId) return;
             try {
                 const response = await apiRequest(`/feed/api/posts/${postId}/like`, 'POST');
                 const likeButton = target;
@@ -222,22 +290,29 @@ document.addEventListener('DOMContentLoaded', async () => {
                 console.error("Erro ao curtir:", error);
             }
         } else if (target.classList.contains('comment-button')) {
+            if (!postId) return;
             const commentsSection = document.getElementById(`comments-section-${postId}`);
             const commentsListDiv = document.getElementById(`comments-list-${postId}`);
             if (commentsSection) {
                 const isVisible = commentsSection.style.display === 'block';
                 commentsSection.style.display = isVisible ? 'none' : 'block';
-                if (!isVisible && commentsListDiv && (commentsListDiv.children.length === 0 || commentsListDiv.querySelector('.no-comments'))) {
-                    await loadAndDisplayComments(postId, commentsListDiv);
+                if (!isVisible && commentsListDiv) {
+                    const postElement = document.querySelector(`.post[data-post-id="${postId}"]`);
+                    const parentPostForComments = {
+                        user_id: parseInt(postElement.dataset.userId),
+                        id: parseInt(postId)
+                    };
+                    await loadAndDisplayComments(postId, commentsListDiv, parentPostForComments);
                 }
             }
         } else if (target.classList.contains('share-button')) {
+            if (!postId) return;
             const postUrl = `${window.location.origin}/feed#post-${postId}`;
             try {
                 await navigator.clipboard.writeText(`Confira este post: ${postUrl}`);
-                alert("Link do post copiado para a área de transferência!");
+                showCustomAlert("Link do post copiado para a área de transferência!", 'success');
             } catch (err) {
-                alert("Não foi possível copiar o link. Você pode copiar manualmente: " + postUrl);
+                showCustomAlert("Não foi possível copiar o link. Você pode copiar manualmente: " + postUrl, 'info');
             }
         }
     };
@@ -250,7 +325,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const content = commentInput.value.trim();
 
         if (!content) {
-            alert("O comentário não pode estar vazio.");
+            showCustomAlert("O comentário não pode estar vazio.", 'error');
             return;
         }
 
@@ -261,14 +336,18 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (commentsListDiv) {
                     const noCommentsP = commentsListDiv.querySelector('.no-comments');
                     if (noCommentsP) noCommentsP.remove();
-
-                    commentsListDiv.appendChild(renderComment(response.comment));
+                    const postElement = document.querySelector(`.post[data-post-id="${postId}"]`);
+                    const parentPostForNewComment = {
+                        user_id: parseInt(postElement.dataset.userId),
+                        id: parseInt(postId)
+                    };
+                    commentsListDiv.appendChild(renderComment(response.comment, parentPostForNewComment));
                 }
                 commentInput.value = '';
 
                 const postElement = document.querySelector(`.post[data-post-id="${postId}"]`);
                 const commentCountDisplay = postElement ? postElement.querySelector('.comment-count-display') : null;
-                if (commentCountDisplay) {
+                if (commentCountDisplay && response.comment_count !== undefined) {
                     commentCountDisplay.textContent = `${response.comment_count || 0} comentário${response.comment_count !== 1 ? 's' : ''}`;
                 }
             }
@@ -286,11 +365,21 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-
-    const loadPosts = async (filter = 'all') => {
+    const loadPosts = async (filter = 'all', searchQuery = null) => {
         if (!postsContainer || !postPlaceholder) return;
+        postPlaceholder.style.display = 'none';
+
         try {
-            const endpoint = filter === 'all' ? '/feed/api/posts' : `/feed/api/posts?filter=${filter}`;
+            let endpoint = '/feed/api/posts?';
+            const params = new URLSearchParams();
+            if (filter !== 'all') {
+                params.append('filter', filter);
+            }
+            if (searchQuery) {
+                params.append('query', searchQuery);
+            }
+            endpoint += params.toString();
+
             const data = await apiRequest(endpoint, 'GET');
             postsContainer.innerHTML = '';
             if (data.posts && data.posts.length > 0) {
@@ -298,16 +387,24 @@ document.addEventListener('DOMContentLoaded', async () => {
                 data.posts.forEach(post => {
                     postsContainer.appendChild(renderPost(post, window.currentUserData));
                 });
-                if (window.currentUserData && userPostCountElement && filter === 'all') {
-                    const userPosts = data.posts.filter(p => p.user_id === window.currentUserData.id);
-                    userPostCountElement.textContent = userPosts.length;
+                if (window.currentUserData && userPostCountElement && filter === 'all' && !searchQuery) {
+                    const userActorId = window.currentUserData.id;
+                    if (window.currentUserData.actor_type === 'artist') {
+                        const userPosts = data.posts.filter(p => p.user_id === userActorId);
+                        userPostCountElement.textContent = userPosts.length;
+                    }
                 }
 
             } else {
                 postsContainer.appendChild(postPlaceholder);
                 postPlaceholder.style.display = 'block';
-                postPlaceholder.innerHTML = '<p>Nenhuma publicação para exibir com este filtro.</p><p><i class="fas fa-stream fa-2x"></i></p>';
-                if (userPostCountElement && filter === 'all') userPostCountElement.textContent = '0';
+                let message = 'Nenhuma publicação para exibir.';
+                if (searchQuery) message = `Nenhuma publicação encontrada para "${searchQuery}".`;
+                else if (filter !== 'all') message = 'Nenhuma publicação para exibir com este filtro.';
+                postPlaceholder.innerHTML = `<p>${message}</p><p><i class="fas fa-stream fa-2x"></i></p>`;
+                if (userPostCountElement && filter === 'all' && !searchQuery && window.currentUserData && window.currentUserData.actor_type === 'artist') {
+                    userPostCountElement.textContent = '0';
+                }
             }
         } catch (error) {
             console.error("Erro ao carregar posts:", error);
@@ -318,18 +415,20 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     };
 
-
     if (createPostForm) {
         createPostForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            if (!postContentInput || !postTypeInput) return;
+            if (!postContentInput || !postTypeInput) {
+                console.error("Elementos do formulário de criação de post não encontrados.");
+                return;
+            }
 
             const content = postContentInput.value.trim();
             const mediaFile = postMediaInput ? postMediaInput.files[0] : null;
             const postType = postTypeInput.value;
 
             if (!content && !mediaFile) {
-                alert("A publicação deve ter conteúdo ou uma mídia.");
+                showCustomAlert("A publicação deve ter conteúdo ou uma mídia.", 'error');
                 return;
             }
 
@@ -347,22 +446,25 @@ document.addEventListener('DOMContentLoaded', async () => {
                     createPostForm.reset();
                     if (postMediaNameDisplay) postMediaNameDisplay.textContent = '';
                     if (currentFilter === 'all' && userPostCountElement && window.currentUserData && result.post.user_id === window.currentUserData.id) {
-                        userPostCountElement.textContent = parseInt(userPostCountElement.textContent || "0") + 1;
+                        if (window.currentUserData.actor_type === 'artist') {
+                             userPostCountElement.textContent = parseInt(userPostCountElement.textContent || "0") + 1;
+                        }
                     }
                 }
             } catch (error) {
+                console.error("Erro ao criar post:", error);
             }
         });
-    }
 
-    if (postMediaInput && postMediaNameDisplay) {
-        postMediaInput.addEventListener('change', () => {
-            if (postMediaInput.files.length > 0) {
-                postMediaNameDisplay.textContent = postMediaInput.files[0].name;
-            } else {
-                postMediaNameDisplay.textContent = '';
-            }
-        });
+        if (postMediaInput && postMediaNameDisplay) {
+            postMediaInput.addEventListener('change', () => {
+                if (postMediaInput.files.length > 0) {
+                    postMediaNameDisplay.textContent = postMediaInput.files[0].name;
+                } else {
+                    postMediaNameDisplay.textContent = '';
+                }
+            });
+        }
     }
 
     if (highlightsContainer) {
@@ -372,46 +474,65 @@ document.addEventListener('DOMContentLoaded', async () => {
                 currentFilter = highlightItem.dataset.filter;
                 document.querySelectorAll('.highlight').forEach(item => item.classList.remove('active-filter'));
                 highlightItem.classList.add('active-filter');
-                loadPosts(currentFilter);
+                const userFeedSearchInput = document.getElementById('userFeedSearch');
+                let searchTerm = null;
+                if (userFeedSearchInput && userFeedSearchInput.value.trim() !== '') {
+                }
+                loadPosts(currentFilter, searchTerm);
+            }
+        });
+    }
+
+    const userFeedSearchInput = document.getElementById('userFeedSearch');
+    if (userFeedSearchInput) {
+        userFeedSearchInput.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                const searchTerm = userFeedSearchInput.value.trim();
+                loadPosts(currentFilter, searchTerm);
+            }
+        });
+        userFeedSearchInput.addEventListener('input', function() {
+            if (userFeedSearchInput.value.trim() === "") {
             }
         });
     }
 
     try {
-        const userData = await apiRequest('/feed/api/user', 'GET');
-        if (userData.user) {
-            updateProfileUI(userData.user);
-            window.currentUserData = userData.user;
-            await loadPosts(currentFilter);
+        const userDataResponse = await apiRequest('/feed/api/user', 'GET');
+        if (userDataResponse.user) {
+            window.currentUserData = userDataResponse.user;
+            updateProfileUI(window.currentUserData);
         } else {
             updateProfileUI(null);
-            await loadPosts(currentFilter);
         }
     } catch (error) {
         updateProfileUI(null);
-        await loadPosts(currentFilter);
         if (error.message && (error.message.includes("Autenticação requerida") || error.message.includes("Usuário não encontrado"))) {
-            alert("Sua sessão expirou ou você não está autenticado. Redirecionando para o login.");
-            window.location.href = '/auth/login';
+            window.location.href = '/login';
+            return;
         }
     }
+
+    await loadPosts(currentFilter);
 
     const logoutButton = document.getElementById('logoutButton');
     if (logoutButton) {
         logoutButton.addEventListener('click', async () => {
             try {
-                await apiRequest('/auth/logout', 'POST');
+                await apiRequest('/logout', 'POST');
                 window.currentUserData = null;
-                window.location.href = '/auth/login';
+                window.location.href = '/';
             } catch (error) {
+                console.error("Erro ao fazer logout:", error)
             }
         });
     }
 
     document.addEventListener('profileUpdatedGlobal', async (event) => {
         if (event.detail && event.detail.user) {
-            updateProfileUI(event.detail.user);
             window.currentUserData = event.detail.user;
+            updateProfileUI(window.currentUserData);
             await loadPosts(currentFilter);
         }
     });

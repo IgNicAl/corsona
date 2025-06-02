@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <link rel="stylesheet" href="../../static/css/pageInicial.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='images/logos/logo6.svg') }}">
+    <title>Seja Bem vindo ao Corsona</title>
+  </head>
+  <body>
+    <div class="bgAnimation" id="bgAnimation">
+      <div class="backgroundAmim"></div>
+    </div>
+
+    <div class="container">
+      <nav>
+        <h1 onclick="window.location.href='/'" style="cursor:pointer;">CORSONA</h1>
+        <ul>
+          <li><a href="#home-section">Início</a></li>
+          <li><a href="#help-section">Ajuda</a></li>
+          <li><a href="#about-section">Sobre</a></li>
+          <li><a href="{{ url_for('auth.login') }}" class="nav-button">Entrar</a></li>
+        </ul>
+      </nav>
+      <section id="home-section">
+        <div class="textBox">
+          <h1><span>Olá!</span> Seja Bem Vindo ao Corsona!</h1>
+          <p>Aqui a conexão vai além da <span class="musica">Música</span></p>
+          <a href="{{ url_for('auth.login') }}">
+            <button class="homeBtn" style="--i: #fff">Entrar</button>
+          </a>
+        </div>
+      </section>
+
+      <section id="help-section" class="content-section">
+        <h2>Ajuda</h2>
+        <div class="card-container">
+          <div class="card">
+            <h3>Como usar o Corsona?</h3>
+            <p>
+              Explore nossa plataforma para descobrir novas músicas, artistas e
+              se conectar com outros amantes da música. Basta criar sua conta e
+              começar a navegar!
+            </p>
+          </div>
+          <div class="card">
+            <h3>Dúvidas frequentes</h3>
+            <p>
+              Temos uma seção de FAQ abrangente para responder às suas
+              perguntas mais comuns sobre o Corsona.
+            </p>
+          </div>
+          <div class="card">
+            <h3>Fale Conosco</h3>
+            <p>
+              Se precisar de ajuda adicional, entre em contato com nossa equipe
+              de suporte. Estamos aqui para ajudar!
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section id="about-section" class="content-section">
+        <h2>Sobre o Corsona</h2>
+        <div class="card-container">
+          <div class="card">
+            <h3>Nossa Missão</h3>
+            <p>
+              Conectamos pessoas através da paixão pela música, criando uma
+              comunidade vibrante e acolhedora para todos os ouvintes.
+            </p>
+          </div>
+          <div class="card">
+            <h3>Quem Somos</h3>
+            <p>
+              Uma equipe dedicada de entusiastas da música, construindo a
+              melhor plataforma para você explorar e compartilhar suas paixões
+              musicais.
+            </p>
+          </div>
+          <div class="card">
+            <h3>Nossa Visão</h3>
+            <p>
+              Ser o principal destino online para a comunidade musical, onde a
+              descoberta e a conexão se unem.
+            </p>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <script src="../../static/js/homescript.js"></script>
+  </body>
+</html>
