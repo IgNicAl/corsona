@@ -1,9 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
     console.log("JavaScript específico do feed do artista carregado.");
 
-    const manageMyPostsButton = document.getElementById('manageMyPostsButton');
-    if (manageMyPostsButton) {
-        manageMyPostsButton.addEventListener('click', () => {
+    const managePosts = document.getElementById('managePosts');
+    if (managePosts) {
+        managePosts.addEventListener('click', () => {
             if(window.currentUserData && window.currentUserData.actor_type === 'artist'){
               const artistId = window.currentUserData.id;
               const postsOnPage = document.querySelectorAll('.post');
@@ -38,23 +38,23 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    const createPostModal = document.getElementById('createPostModal');
-    const openCreatePostModalButton = document.getElementById('openCreatePostModalButton');
-    const closeCreatePostModalButton = document.getElementById('closeCreatePostModalButton');
-    const cancelCreatePostModalButton = document.getElementById('cancelCreatePostModalButton');
+    const postModal = document.getElementById('postModal');
+    const openPostModalButton = document.getElementById('openPostModalButton');
+    const closePostModalButton = document.getElementById('closePostModalButton');
+    const cancelPostModalButton = document.getElementById('cancelPostModalButton');
 
     const formInsideModal = document.getElementById('createPostForm');
     const postMediaNameDisplayInModal = document.getElementById('postMediaName');
 
     const openModal = () => {
-        if (createPostModal) {
-            createPostModal.style.display = 'flex';
+        if (postModal) {
+            postModal.style.display = 'flex';
         }
     };
 
     const closeModal = () => {
-        if (createPostModal) {
-            createPostModal.style.display = 'none';
+        if (postModal) {
+            postModal.style.display = 'none';
             if (formInsideModal) {
                 formInsideModal.reset();
             }
@@ -64,21 +64,21 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    if (openCreatePostModalButton) {
-        openCreatePostModalButton.addEventListener('click', openModal);
+    if (openPostModalButton) {
+        openPostModalButton.addEventListener('click', openModal);
     }
 
-    if (closeCreatePostModalButton) {
-        closeCreatePostModalButton.addEventListener('click', closeModal);
+    if (closePostModalButton) {
+        closePostModalButton.addEventListener('click', closeModal);
     }
 
-    if (cancelCreatePostModalButton) {
-        cancelCreatePostModalButton.addEventListener('click', closeModal);
+    if (cancelPostModalButton) {
+        cancelPostModalButton.addEventListener('click', closeModal);
     }
 
-    if (createPostModal) {
-        createPostModal.addEventListener('click', (event) => {
-            if (event.target === createPostModal) {
+    if (postModal) {
+        postModal.addEventListener('click', (event) => {
+            if (event.target === postModal) {
                 closeModal();
             }
         });

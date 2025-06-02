@@ -6,7 +6,7 @@ block head_css %}
 />
 <link
   rel="stylesheet"
-  href="{{ url_for('static', filename='css/profile_modal_styles.css') }}"
+  href="{{ url_for('static', filename='css/modal.css') }}"
 />
 <link
   rel="stylesheet"
@@ -25,7 +25,7 @@ block head_css %}
         <h1 onclick="window.location.href='/'" style="cursor:pointer;">CORSONA</h1>
         <input class="search-bar" type="search" id="userFeedSearch" placeholder="Buscar artistas" >
         <ul>
-          <button id="openCreatePostModalButton" class="nav-button" style="border-radius: 5px;">Nova Publicação</button>
+          <button id="openPostModalButton" class="nav-button" style="border-radius: 5px;">Nova Publicação</button>
           <li><a id="logoutButton" class="nav-button">Sair</a></li>
         </ul>
       </nav>
@@ -91,7 +91,7 @@ block head_css %}
               </div>
             </div>
           </div>
-          <button id="manageMyPostsButton" class="nav-button" style="border-radius: 5px;">Gerenciar Minhas Publicações</button>
+          <button id="managePosts" class="nav-button" style="border-radius: 5px;">Gerenciar Minhas Publicações</button>
         </aside>
 
         <main class="main-content">
@@ -235,14 +235,21 @@ block head_css %}
   </div>
 </div>
 
-<div id="createPostModal" class="modal" style="display: none;">
+<div id="postModal" class="modal" style="display: none;">
   <div class="modal-dialog">
     <div class="modal-header">
       <h2>Nova Publicação</h2>
-      <button id="closeCreatePostModalButton" class="close-modal-button" aria-label="Fechar modal">×</button>
+      <button id="closePostModalButton" class="close-modal-button" aria-label="Fechar modal">×</button>
     </div>
     <div class="modal-body">
       <form id="createPostForm">
+        <div class="form-group">
+          <label for="postType">Tipo de Post:</label>
+          <select id="postType" name="post_type">
+            <option value="publication" selected>Publicação</option>
+            <option value="event">Evento</option>
+          </select>
+        </div>
         <div class="form-group">
           <textarea
             id="postContent"
@@ -263,17 +270,10 @@ block head_css %}
           />
           <span id="postMediaName" class="file-name-display"></span>
         </div>
-        <div class="form-group">
-          <label for="postType">Tipo de Post:</label>
-          <select id="postType" name="post_type">
-            <option value="publication" selected>Publicação</option>
-            <option value="event">Evento</option>
-          </select>
-        </div>
       </form>
     </div>
     <div class="modal-footer">
-      <button type="button" id="cancelCreatePostModalButton" class="modal-button">Cancelar</button>
+      <button type="button" id="cancelPostModalButton" class="modal-button">Cancelar</button>
       <button type="submit" form="createPostForm" class="modal-button primary">Publicar</button>
     </div>
   </div>

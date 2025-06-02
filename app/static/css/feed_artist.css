@@ -17,22 +17,26 @@
   color: #333;
 }
 
-#manageMyPostsButton {
+#managePosts {
   background-color: rgba(0, 0, 0, 0.7);
   color: var(--primary-color);
   border: 1px solid var(--primary-color);
-  padding: 8px 15px;
+  width: 100%;
+  padding: 10px 16px;
+  cursor: pointer;
+  text-align: center;
+  margin-top: auto;
   font-size: 0.9em;
   font-weight: bold;
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-#manageMyPostsButton:hover {
+#managePosts:hover {
   background-color: var(--saturated-orange);
   color: var(--quantum);
 }
 
-#openCreatePostModalButton {
+#openPostModalButton {
   background-color: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
   color: var(--white);
@@ -43,7 +47,7 @@
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-#openCreatePostModalButton:hover {
+#openPostModalButton:hover {
   background-color: var(--primary-color);
   color: var(--quantum);
 }

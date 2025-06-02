@@ -452,9 +452,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                     createPostForm.reset();
                     if (postMediaNameDisplay) postMediaNameDisplay.textContent = '';
 
-                    const activeCreatePostModal = document.getElementById('createPostModal');
-                    if (activeCreatePostModal && activeCreatePostModal.style.display === 'flex') {
-                         activeCreatePostModal.style.display = 'none';
+                    const activePostModal = document.getElementById('postModal');
+                    if (activePostModal && activePostModal.style.display === 'flex') {
+                         activePostModal.style.display = 'none';
                     }
 
                     if (currentFilter === 'all' && userPostCountElement && window.currentUserData && result.post.user_id === window.currentUserData.id) {
