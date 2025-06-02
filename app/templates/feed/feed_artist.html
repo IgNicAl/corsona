@@ -25,21 +25,18 @@ block head_css %}
         <h1 onclick="window.location.href='/'" style="cursor:pointer;">CORSONA</h1>
         <input class="search-bar" type="search" id="userFeedSearch" placeholder="Buscar artistas" >
         <ul>
-          <button id="manageMyPostsButton" class="nav-button" style="border-radius: 5px;">Gerenciar Minhas Publicações</button>
-          <!-- <li><a href="/">Início</a></li> -->
-          <!-- <li><a href="{{ url_for('main.index', _anchor='help-section') }}">Ajuda</a></li>
-          <li><a href="{{ url_for('main.index', _anchor='about-section') }}">Sobre</a></li> -->
+          <button id="openCreatePostModalButton" class="nav-button" style="border-radius: 5px;">Nova Publicação</button>
           <li><a id="logoutButton" class="nav-button">Sair</a></li>
         </ul>
       </nav>
     </div>
-<div class="container">
- <aside class="sidebar">
-    <div class="profile-header">
-      <div class="profile-avatar">
-        <div
-          class="profile-img"
-          id="sidebarProfileAvatar"
+    <div class="container">
+      <aside class="sidebar">
+        <div class="profile-header">
+          <div class="profile-avatar">
+            <div
+            class="profile-img"
+            id="sidebarProfileAvatar"
           style="background-image: url('{{ session.user_avatar_path or url_for('static', filename='images/logos/avatar-default.svg') }}'); background-position: {{ session.user_avatar_position or 'center' }}; background-size: {{ session.user_avatar_size or 'cover' }};"
         ></div>
       </div>
@@ -59,81 +56,45 @@ block head_css %}
     <div class="profile-stats">
       <div class="stat">
         <span class="stat-count" id="userPostCount">0</span
-        ><span class="stat-label">Publicações</span>
-      </div>
-      <div class="stat">
-        <span class="stat-count">0</span
-        ><span class="stat-label">Seguidores</span>
-      </div>
-      <div class="stat">
-        <span class="stat-count">0</span
-        ><span class="stat-label">Seguindo</span>
-      </div>
-    </div>
-    <div class="profile-bio">
-      <p id="bioDisplay" class="bio-text">Sua bio aparecerá aqui.</p>
-    </div>
-    <div class="profile-highlights">
-      <h3>Destaques</h3>
-      <div class="highlights-container">
-        <div class="highlight" data-filter="audio">
-          <div class="highlight-img"><i class="fas fa-music"></i></div>
-          <span>Músicas</span>
+          ><span class="stat-label">Publicações</span>
         </div>
-        <div class="highlight" data-filter="event">
-          <div class="highlight-img"><i class="fas fa-calendar-alt"></i></div>
-          <span>Eventos</span>
-        </div>
-        <div class="highlight" data-filter="media">
-          <div class="highlight-img"><i class="fas fa-photo-video"></i></div>
-          <span>Mídia</span>
-        </div>
-        <div class="highlight active-filter" data-filter="all">
-          <div class="highlight-img"><i class="fas fa-globe"></i></div>
-          <span>Todos</span>
-        </div>
-      </div>
-    </div>
-  </aside>
+        <div class="stat">
+          <span class="stat-count">0</span
+            ><span class="stat-label">Seguidores</span>
+          </div>
+          <div class="stat">
+            <span class="stat-count">0</span
+              ><span class="stat-label">Seguindo</span>
+            </div>
+          </div>
+          <div class="profile-bio">
+            <p id="bioDisplay" class="bio-text">Sua bio aparecerá aqui.</p>
+          </div>
+          <div class="profile-highlights">
+            <h3>Destaques</h3>
+            <div class="highlights-container">
+              <div class="highlight" data-filter="audio">
+                <div class="highlight-img"><i class="fas fa-music"></i></div>
+                <span>Músicas</span>
+              </div>
+              <div class="highlight" data-filter="event">
+                <div class="highlight-img"><i class="fas fa-calendar-alt"></i></div>
+                <span>Eventos</span>
+              </div>
+              <div class="highlight" data-filter="media">
+                <div class="highlight-img"><i class="fas fa-photo-video"></i></div>
+                <span>Mídia</span>
+              </div>
+              <div class="highlight active-filter" data-filter="all">
+                <div class="highlight-img"><i class="fas fa-globe"></i></div>
+                <span>Todos</span>
+              </div>
+            </div>
+          </div>
+          <button id="manageMyPostsButton" class="nav-button" style="border-radius: 5px;">Gerenciar Minhas Publicações</button>
+        </aside>
 
-  <main class="main-content">
-    <!-- <div class="artist-feed-header-tools">
-      <h3>Painel do Artista</h3>
-      <p>Gerencie suas publicações e veja seu alcance.</p>
-    </div> -->
-
-    <div class="create-post-section">
-      <h3>Criar Nova Publicação</h3>
-      <form id="createPostForm">
-        <div class="form-group">
-          <textarea
-            id="postContent"
-            name="content"
-            placeholder="No que você está pensando?"
-          ></textarea>
-        </div>
-        <div class="form-group file-input-group">
-          <label for="postMedia" class="file-label"
-            ><i class="fas fa-photo-video"></i> Adicionar Mídia</label
-          >
-          <input
-            type="file"
-            id="postMedia"
-            name="media"
-            accept="image/png, image/jpeg, image/gif, video/mp4, video/webm, video/ogg, audio/mp3, audio/wav"
-          />
-          <span id="postMediaName" class="file-name-display"></span>
-        </div>
-        <div class="form-group">
-          <label for="postType">Tipo de Post:</label>
-          <select id="postType" name="post_type">
-            <option value="publication" selected>Publicação</option>
-            <option value="event">Evento</option>
-          </select>
-        </div>
-        <button type="submit" class="submit-post-button">Publicar</button>
-      </form>
-    </div>
+        <main class="main-content">
 
     <h1 class="feed-title">Publicações Recentes</h1>
     <div id="postsContainer">
@@ -273,10 +234,56 @@ block head_css %}
     </div>
   </div>
 </div>
-{% endblock %} {% block scripts %}
+
+<div id="createPostModal" class="modal" style="display: none;">
+  <div class="modal-dialog">
+    <div class="modal-header">
+      <h2>Nova Publicação</h2>
+      <button id="closeCreatePostModalButton" class="close-modal-button" aria-label="Fechar modal">×</button>
+    </div>
+    <div class="modal-body">
+      <form id="createPostForm">
+        <div class="form-group">
+          <textarea
+            id="postContent"
+            name="content"
+            placeholder="No que você está pensando?"
+          ></textarea>
+        </div>
+        <div class="form-group file-input-group">
+          <label for="postMedia" class="file-label"
+            ><i class="fas fa-photo-video"></i> Adicionar Mídia</label
+          >
+          <input
+            type="file"
+            id="postMedia"
+            name="media"
+            accept="image/png, image/jpeg, image/gif, video/mp4, video/webm, video/ogg, audio/mp3, audio/wav"
+            style="display: none;"
+          />
+          <span id="postMediaName" class="file-name-display"></span>
+        </div>
+        <div class="form-group">
+          <label for="postType">Tipo de Post:</label>
+          <select id="postType" name="post_type">
+            <option value="publication" selected>Publicação</option>
+            <option value="event">Evento</option>
+          </select>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button type="button" id="cancelCreatePostModalButton" class="modal-button">Cancelar</button>
+      <button type="submit" form="createPostForm" class="modal-button primary">Publicar</button>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
 <script src="{{ url_for('static', filename='js/apiService.js') }}"></script>
 <script src="{{ url_for('static', filename='js/feed.js') }}"></script>
 <script src="{{ url_for('static', filename='js/profileModal.js') }}"></script>
 <script src="{{ url_for('static', filename='js/feed_artist.js') }}"></script>
-<script src="{{ url_for('static', filename='js/feed_user.js') }}"></script>
 {% endblock %}

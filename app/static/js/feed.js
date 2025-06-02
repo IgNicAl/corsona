@@ -41,6 +41,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 sidebarProfileAvatar.style.backgroundPosition = 'center';
                 sidebarProfileAvatar.style.backgroundSize = 'cover';
             }
+            if (postContentInput && user.actor_type === 'artist') {
+                 postContentInput.placeholder = `No que você está pensando, ${user.name || user.username}?`;
+            } else if (postContentInput) {
+                 postContentInput.placeholder = `No que você está pensando?`;
+            }
+
 
         } else {
             profileName.textContent = 'Carregando...';
@@ -419,7 +425,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         createPostForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             if (!postContentInput || !postTypeInput) {
-                console.error("Elementos do formulário de criação de post não encontrados.");
+                console.error("Elementos do formulário de criação de post não encontrados para submissão.");
                 return;
             }
 
@@ -445,6 +451,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                     await loadPosts(currentFilter);
                     createPostForm.reset();
                     if (postMediaNameDisplay) postMediaNameDisplay.textContent = '';
+
+                    const activeCreatePostModal = document.getElementById('createPostModal');
+                    if (activeCreatePostModal && activeCreatePostModal.style.display === 'flex') {
+                         activeCreatePostModal.style.display = 'none';
+                    }
+
                     if (currentFilter === 'all' && userPostCountElement && window.currentUserData && result.post.user_id === window.currentUserData.id) {
                         if (window.currentUserData.actor_type === 'artist') {
                              userPostCountElement.textContent = parseInt(userPostCountElement.textContent || "0") + 1;
@@ -477,6 +489,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const userFeedSearchInput = document.getElementById('userFeedSearch');
                 let searchTerm = null;
                 if (userFeedSearchInput && userFeedSearchInput.value.trim() !== '') {
+                    searchTerm = userFeedSearchInput.value.trim();
                 }
                 loadPosts(currentFilter, searchTerm);
             }
@@ -494,6 +507,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
         userFeedSearchInput.addEventListener('input', function() {
             if (userFeedSearchInput.value.trim() === "") {
+                loadPosts(currentFilter, null);
             }
         });
     }

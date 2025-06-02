@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
               if (foundPosts > 0) {
                 showCustomAlert("Suas publicações foram destacadas. Use o menu em cada post para gerenciar.", 'info');
               } else {
-                showCustomAlert("Você não tem publicações visíveis nessa págia para destacar.", 'info');
+                showCustomAlert("Você não tem publicações visíveis nessa página para destacar.", 'info');
               }
             } else {
               showCustomAlert("Funcionalidade disponível apenas para artistas logados.", 'error');
@@ -27,13 +27,59 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    const createPostFormArtist = document.getElementById('createPostForm');
-    if (createPostFormArtist) {
-        createPostFormArtist.addEventListener('submit', function(event) {
+    const createPostFormArtistPage = document.getElementById('createPostForm');
+    if (createPostFormArtistPage) {
+        createPostFormArtistPage.addEventListener('submit', function(event) {
             const postContent = document.getElementById('postContent')?.value.trim();
-            const postMedia = document.getElementById('postMedia')?.files.length > 0;
+            const postMedia = document.getElementById('postMedia')?.files[0];
             if (!postContent && !postMedia) {
-                console.warn("Artista tentando enviar uma publicação vazia.");
+                console.warn("Artista tentando enviar uma publicação vazia (verificação em feed_artist.js).");
+            }
+        });
+    }
+
+    const createPostModal = document.getElementById('createPostModal');
+    const openCreatePostModalButton = document.getElementById('openCreatePostModalButton');
+    const closeCreatePostModalButton = document.getElementById('closeCreatePostModalButton');
+    const cancelCreatePostModalButton = document.getElementById('cancelCreatePostModalButton');
+
+    const formInsideModal = document.getElementById('createPostForm');
+    const postMediaNameDisplayInModal = document.getElementById('postMediaName');
+
+    const openModal = () => {
+        if (createPostModal) {
+            createPostModal.style.display = 'flex';
+        }
+    };
+
+    const closeModal = () => {
+        if (createPostModal) {
+            createPostModal.style.display = 'none';
+            if (formInsideModal) {
+                formInsideModal.reset();
+            }
+            if (postMediaNameDisplayInModal) {
+                postMediaNameDisplayInModal.textContent = '';
+            }
+        }
+    };
+
+    if (openCreatePostModalButton) {
+        openCreatePostModalButton.addEventListener('click', openModal);
+    }
+
+    if (closeCreatePostModalButton) {
+        closeCreatePostModalButton.addEventListener('click', closeModal);
+    }
+
+    if (cancelCreatePostModalButton) {
+        cancelCreatePostModalButton.addEventListener('click', closeModal);
+    }
+
+    if (createPostModal) {
+        createPostModal.addEventListener('click', (event) => {
+            if (event.target === createPostModal) {
+                closeModal();
             }
         });
     }
