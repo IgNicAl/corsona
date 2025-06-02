@@ -103,7 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const data = await apiRequest(`/feed/api/posts/${postId}/comments`, 'GET');
             commentsListDiv.innerHTML = '';
-            const parentPostData = { // Construct parentPostData needed for renderCommentForModal
+            const parentPostData = {
                 user_id: parseInt(parentPostElement.dataset.userId),
                 id: parseInt(postId)
             };
