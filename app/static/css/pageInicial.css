@@ -1,5 +1,5 @@
 
-@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700&display=swap'); 
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
 
 * {
     margin: 0;
@@ -10,53 +10,7 @@
 body {
     color: #fff;
     background: #111;
-    font-family: 'Open Sans', sans-serif; 
-    padding-top: 100px;
-    position: relative;
-    z-index: 0;
-}
-
-html {
-    scroll-behavior: smooth;
-}
-
-.bgAnimation {
-    position: fixed; 
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100vh;
-    display: grid;
-    grid-template-columns: repeat(20, 1fr);
-    grid-template-rows: repeat(20, 1fr);
-    filter: saturate(2);
-    overflow: hidden;
-    z-index: -9999;
-    pointer-events: none;
-}
-
-.colorBox {
-    filter: brightness(1.1);
-    transition: 2s ease;
-    position: relative;
-    margin: 2px;
-    background: #1d1d1d;
-}
-
-.colorBox:hover {
-    background: #da6a05;
-    transition-duration: 0s;
-}
-
-.backgroundAmim {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 40px;
-    background: #da6a05;
-    filter: blur(60px);
-    animation: animBack 6s linear infinite;
+    font-family: 'Poppins',sans-serif;
 }
 
 @keyframes animBack {
@@ -69,19 +23,14 @@ html {
 }
 
 
-.container {
+.container{
     width: 100%;
-    min-height: calc(100vh - 100px); 
-    pointer-events: auto; 
-    display: flex;
-    flex-direction: column; 
-    position: relative; 
-    z-index: 1;
-    background: rgba(0, 0, 0, 0.2); 
+    min-height: 100vh;
+    backdrop-filter: blur(1px);
+    pointer-events: none;
 }
 
-
-.container nav {
+.container nav{
     width: 100%;
     display: flex;
     justify-content: space-between;
@@ -89,13 +38,6 @@ html {
     padding: 0 40px;
     height: 100px;
     align-items: center;
-
-    position: fixed; 
-    top: 0;
-    left: 0;
-    z-index: 1000; 
-    background: rgba(0, 0, 0, 0.8); 
-    pointer-events: auto; 
 }
 
 .container nav h1 {
@@ -129,13 +71,7 @@ html {
     overflow: hidden;
 }
 
-.container nav ul li a {
-    color: #fff; 
-    text-decoration: none;
-    transition: color 0.3s ease;
-}
-
-.container nav ul li::after {
+.container nav ul li::after{
     content: '';
     position: absolute;
     bottom: 5px;
@@ -161,18 +97,10 @@ html {
     align-items: center;
     min-height: calc(100vh - 100px);
     text-align: center;
-    padding: 80px 50px;
-    position: relative; 
-    z-index: 5; 
-    background: rgba(0, 0, 0, 0.5); 
-    margin-top: 0; 
-    border-radius: 0; 
+    pointer-events: none;
 }
 
-
-
-
-.textBox h1 {
+.textBox h1{
     font-size: 3.4em;
 }
 
@@ -209,20 +137,18 @@ html {
     color: #000;
 }
 
-.content-section {
-  
-    background: rgba(0, 0, 0, 0.6); 
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3); 
-    margin-top: 0; 
-    border-radius: 0; 
-    pointer-events: auto; 
-}
-
-.content-section h2 {
-    font-size: 3em;
-    margin-bottom: 40px;
-    color: #fff;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+.bgAnimation{
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    display: grid;
+    grid-template-columns: repeat(20,1fr);
+    grid-template-rows: repeat(20,1fr);
+    background: #1d1d1d;
+    filter: saturate(2);
+    overflow: hidden;
 }
 
 .card-container {
@@ -246,18 +172,11 @@ html {
     pointer-events: auto;
 }
 
-.card:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
-}
-
-.card h3 {
-    font-size: 1.8em;
-    margin-bottom: 15px;
-    color: #da6a05;
-}
-
-.card p {
-    font-size: 1.1em;
-    line-height: 1.6;
+@keyframes animBack {
+    0%{
+        top: -60px;
+    }
+    100%{
+        top: 120%;
+    }
 }

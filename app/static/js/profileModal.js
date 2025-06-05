@@ -14,6 +14,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const bioCharCount = document.getElementById('bioCharCount');
     const emailDisplay = document.getElementById('emailDisplay');
 
+    const rgDisplay = document.getElementById('rgDisplay');
+    const cpfDisplay = document.getElementById('cpfDisplay');
+    const instagramLinkInputModal = document.getElementById('instagramLinkInputModal');
+
     const currentPasswordInput = document.getElementById('currentPassword');
     const newPasswordInput = document.getElementById('newPassword');
     const confirmPasswordInput = document.getElementById('confirmPassword');
@@ -98,6 +102,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 avatarPreviewContainer.style.backgroundPosition = '50% 50%';
                 avatarPreviewContainer.style.backgroundSize = 'cover';
             }
+
+            if (user.actor_type === 'artist') {
+                if (rgDisplay) rgDisplay.textContent = user.rg || 'N/A';
+                if (cpfDisplay) cpfDisplay.textContent = user.cpf || 'N/A';
+                if (instagramLinkInputModal) instagramLinkInputModal.value = user.instagram_link || '';
+            } else {
+                if (rgDisplay) rgDisplay.textContent = 'N/A';
+                if (cpfDisplay) cpfDisplay.textContent = 'N/A';
+                if (instagramLinkInputModal) instagramLinkInputModal.value = '';
+            }
             updateBioCharCount();
         } else {
             nameInput.value = '';
@@ -107,6 +121,10 @@ document.addEventListener('DOMContentLoaded', () => {
             avatarPreviewContainer.style.backgroundImage = `url('${defaultAvatarUrlInModal}')`;
             avatarPreviewContainer.style.backgroundPosition = '50% 50%';
             avatarPreviewContainer.style.backgroundSize = 'cover';
+
+            if (rgDisplay) rgDisplay.textContent = 'N/A';
+            if (cpfDisplay) cpfDisplay.textContent = 'N/A';
+            if (instagramLinkInputModal) instagramLinkInputModal.value = '';
             updateBioCharCount();
         }
     };
@@ -148,7 +166,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 };
                 reader.readAsDataURL(file);
             } else if (file) {
-                alert("Por favor, selecione um arquivo de imagem válido (JPEG, PNG, GIF).");
+                showCustomAlert("Por favor, selecione um arquivo de imagem válido (JPEG, PNG, GIF).", 'error');
                 avatarInput.value = "";
             }
         });
@@ -232,10 +250,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const bio = bioInput.value.trim();
             const avatarFile = avatarInput ? avatarInput.files[0] : null;
 
-            if (!name) { alert('Nome não pode estar vazio.'); return; }
-            if (!username) { alert('Nome de usuário não pode estar vazio.'); return; }
-            if (username.includes(' ')) { alert('Nome de usuário não pode conter espaços.'); return; }
-            if (bio.length > 150) { alert('A descrição deve ter no máximo 150 caracteres.'); return; }
+            if (!name) { showCustomAlert('Nome não pode estar vazio.', 'error'); return; }
+            if (!username) { showCustomAlert('Nome de usuário não pode estar vazio.', 'error'); return; }
+            if (username.includes(' ')) { showCustomAlert('Nome de usuário não pode conter espaços.', 'error'); return; }
+            if (bio.length > 150) { showCustomAlert('A descrição deve ter no máximo 150 caracteres.', 'error'); return; }
 
             const formData = new FormData();
             formData.append('name', name);
@@ -251,12 +269,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 formData.append('avatar', avatarFile);
             }
 
+            if (window.currentUserData && window.currentUserData.actor_type === 'artist' && instagramLinkInputModal) {
+                const instagramLink = instagramLinkInputModal.value.trim();
+                if (!instagramLink && window.currentUserData.actor_type === 'artist') {
+                    showCustomAlert('Link do Instagram é obrigatório para artistas.', 'error');
+                    return;
+                }
+                formData.append('instagram_link', instagramLink);
+            }
+
+
             try {
                 const result = await apiRequest('/profile/api/user/update', 'POST', formData, true);
-                alert(result.message || "Perfil atualizado com sucesso!");
                 closeModal();
                 document.dispatchEvent(new CustomEvent('profileUpdatedGlobal', { detail: { user: result.user } }));
             } catch (error) {
+                console.error("Erro ao salvar perfil:", error);
             }
         });
     }
@@ -270,25 +298,25 @@ document.addEventListener('DOMContentLoaded', () => {
             const confirmPassword = confirmPasswordInput.value;
 
             if (!currentPassword || !newPassword || !confirmPassword) {
-                alert('Por favor, preencha todos os campos de senha.');
+                showCustomAlert('Por favor, preencha todos os campos de senha.', 'error');
                 return;
             }
-            if (newPassword.length < 6) {
-                alert('A nova senha deve ter pelo menos 6 caracteres.');
+            if (newPassword.length < 8) {
+                showCustomAlert('A nova senha deve ter pelo menos 8 caracteres.', 'error');
                 return;
             }
             if (newPassword !== confirmPassword) {
-                alert('A nova senha e a confirmação de senha não coincidem.');
+                showCustomAlert('A nova senha e a confirmação de senha não coincidem.', 'error');
                 return;
             }
 
             try {
                 const result = await apiRequest('/profile/api/user/password', 'POST', { currentPassword, newPassword });
-                alert(result.message || "Senha alterada com sucesso!");
                 currentPasswordInput.value = '';
                 newPasswordInput.value = '';
                 confirmPasswordInput.value = '';
             } catch (error) {
+                console.error("Erro ao alterar senha:", error);
             }
         });
     }

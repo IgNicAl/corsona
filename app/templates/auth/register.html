@@ -4,11 +4,28 @@ block head_css %}
   rel="stylesheet"
   href="{{ url_for('static', filename='css/forms.css') }}"
 />
+<style>
+  .artist-fields {
+    display: none;
+  }
+</style>
 {% endblock %} {% block content %}
 <div class="form-page-container">
   <div class="form-box">
     <h2>Cadastro</h2>
     <form id="registerForm">
+      <div class="form-group">
+        <select
+          class="form-select"
+          id="user_type"
+          name="user_type"
+          required
+          placeholder="Tipo de conta"
+        >
+          <option value="user" selected>Usuário</option>
+          <option value="artist">Artista</option>
+        </select>
+      </div>
       <div class="form-group">
         <input
           type="text"
@@ -44,7 +61,7 @@ block head_css %}
           type="password"
           id="password"
           name="password"
-          placeholder="Senha (mínimo 6 caracteres)"
+          placeholder="Senha (mínimo 8 caracteres)"
           required
           autocomplete="new-password"
         />
@@ -59,6 +76,37 @@ block head_css %}
           autocomplete="new-password"
         />
       </div>
+
+      <div id="artistFieldsDiv" class="artist-fields">
+        <p style="font-weight: bold; margin-bottom: 10px">
+          Informações Adicionais para Artistas:
+        </p>
+        <div class="form-group">
+          <input
+            type="text"
+            id="rg"
+            name="rg"
+            placeholder="RG (somente números)"
+          />
+        </div>
+        <div class="form-group">
+          <input
+            type="text"
+            id="cpf"
+            name="cpf"
+            placeholder="CPF (XXX.XXX.XXX-XX)"
+          />
+        </div>
+        <div class="form-group">
+          <input
+            type="url"
+            id="instagram_link"
+            name="instagram_link"
+            placeholder="Link do seu perfil no Instagram"
+          />
+        </div>
+      </div>
+
       <button type="submit">Cadastrar</button>
     </form>
     <div class="form-link-container">
